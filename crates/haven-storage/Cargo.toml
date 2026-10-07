@@ -1,0 +1,27 @@
+[package]
+name = "haven-storage"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+haven-core = { path = "../haven-core" }
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
+uuid.workspace = true
+chrono.workspace = true
+argon2.workspace = true
+aes-gcm.workspace = true
+zeroize.workspace = true
+rusqlite.workspace = true
+rand.workspace = true
+
+[features]
+default = []
+sqlcipher = []
+
+[dev-dependencies]
+pretty_assertions.workspace = true
