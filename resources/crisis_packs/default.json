@@ -1,0 +1,32 @@
+{
+  "region": "GLOBAL",
+  "country_name": "International Fallback",
+  "emergency_services": "Local Emergency Number",
+  "emergency_description": "Contact your local emergency medical or police service immediately if you are in physical danger.",
+  "resources": [
+    {
+      "name": "Befrienders Worldwide",
+      "phone": null,
+      "text": null,
+      "website": "https://www.befrienders.org",
+      "hours": "24/7",
+      "description": "Global network of emotional support centers and suicide prevention helplines across 32+ countries."
+    },
+    {
+      "name": "findahelpline.com",
+      "phone": null,
+      "text": null,
+      "website": "https://findahelpline.com",
+      "hours": "24/7",
+      "description": "Free, confidential crisis support in over 130 countries worldwide."
+    },
+    {
+      "name": "International Association for Suicide Prevention (IASP)",
+      "phone": null,
+      "text": null,
+      "website": "https://www.iasp.info/resources/Crisis_Centres",
+      "hours": "24/7",
+      "description": "Official worldwide directory of crisis helplines and mental health resources."
+    }
+  ]
+}

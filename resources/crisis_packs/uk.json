@@ -1,0 +1,40 @@
+{
+  "region": "UK",
+  "country_name": "United Kingdom",
+  "emergency_services": "999",
+  "emergency_description": "For immediate physical danger, medical emergency, or life-threatening situation",
+  "resources": [
+    {
+      "name": "Samaritans",
+      "phone": "116 123",
+      "text": null,
+      "website": "https://www.samaritans.org",
+      "hours": "24/7",
+      "description": "Free, confidential emotional support for anyone in distress or struggling to cope."
+    },
+    {
+      "name": "Shout Crisis Text Line",
+      "phone": null,
+      "text": "Text SHOUT to 85258",
+      "website": "https://giveusashout.org",
+      "hours": "24/7",
+      "description": "Free, confidential, 24/7 text messaging support service."
+    },
+    {
+      "name": "NHS Mental Health Services",
+      "phone": "111",
+      "text": null,
+      "website": "https://111.nhs.uk",
+      "hours": "24/7",
+      "description": "Urgent mental health advice and assessment from NHS professionals."
+    },
+    {
+      "name": "National Domestic Abuse Helpline",
+      "phone": "0808 2000 247",
+      "text": null,
+      "website": "https://www.nationaldahelpline.org.uk",
+      "hours": "24/7",
+      "description": "Free, confidential support for women and children experiencing domestic abuse."
+    }
+  ]
+}

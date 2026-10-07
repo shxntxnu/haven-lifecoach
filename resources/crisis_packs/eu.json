@@ -1,0 +1,32 @@
+{
+  "region": "EU",
+  "country_name": "European Union",
+  "emergency_services": "112",
+  "emergency_description": "Single European emergency number for police, ambulance, or fire services",
+  "resources": [
+    {
+      "name": "European Emergency Number",
+      "phone": "112",
+      "text": null,
+      "website": "https://ec.europa.eu/digital-single-market/en/112",
+      "hours": "24/7",
+      "description": "Free of charge across all EU member states from landlines and mobile phones."
+    },
+    {
+      "name": "Missing Children & Child Helplines Europe",
+      "phone": "116 000 / 116 111",
+      "text": null,
+      "website": "https://www.childhelplineinternational.org",
+      "hours": "24/7",
+      "description": "Pan-European helplines for children and young people seeking support."
+    },
+    {
+      "name": "Befrienders Worldwide (Europe)",
+      "phone": null,
+      "text": null,
+      "website": "https://www.befrienders.org",
+      "hours": "24/7",
+      "description": "Directory of local crisis lines and emotional support centers across European nations."
+    }
+  ]
+}

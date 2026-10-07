@@ -1,0 +1,40 @@
+{
+  "region": "US",
+  "country_name": "United States",
+  "emergency_services": "911",
+  "emergency_description": "For immediate physical danger, medical emergency, or life-threatening situation",
+  "resources": [
+    {
+      "name": "988 Suicide & Crisis Lifeline",
+      "phone": "988",
+      "text": "Text 988",
+      "website": "https://988lifeline.org",
+      "hours": "24/7",
+      "description": "Free and confidential support for people in suicidal crisis or emotional distress."
+    },
+    {
+      "name": "Crisis Text Line",
+      "phone": null,
+      "text": "Text HOME to 741741",
+      "website": "https://www.crisistextline.org",
+      "hours": "24/7",
+      "description": "Free, 24/7 confidential crisis support by text message."
+    },
+    {
+      "name": "The Trevor Project (LGBTQ Youth)",
+      "phone": "1-866-488-7386",
+      "text": "Text START to 678-678",
+      "website": "https://www.thetrevorproject.org",
+      "hours": "24/7",
+      "description": "Crisis intervention and suicide prevention services for LGBTQ young people."
+    },
+    {
+      "name": "National Domestic Violence Hotline",
+      "phone": "1-800-799-7233",
+      "text": "Text START to 88788",
+      "website": "https://www.thehotline.org",
+      "hours": "24/7",
+      "description": "24/7 access to resources and support for anyone affected by domestic violence."
+    }
+  ]
+}
