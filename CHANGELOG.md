@@ -9,31 +9,108 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.2.0] - Sprint 2: Cryptographic Storage & Bandit Engine (2026-10-07)
 
-### Added
-- **Argon2id Key Derivation (`haven-storage/crypto.rs`)**: Secure derivation of 256-bit master keys from user PIN/passkey and salt with memory-hard parameters.
-- **Per-Record Crypto-Shredding (`haven-storage/crypto.rs`)**: Envelope encryption using AES-256-GCM. Each memory record has an ephemeral random data key wrapped by the master vault key; overwriting and zeroizing the wrapped key renders raw flash blocks permanently and mathematically unrecoverable.
-- **Relational Storage Manager (`haven-storage/storage.rs`)**: SQLite/SQLCipher persistence for `sessions`, `actions`, `memory_items` (tripartite episodic/semantic/procedural store), and `technique_stats`.
-- **Thompson Sampling Contextual Bandit (`haven-core/policy.rs`)**: Beta distribution sampling ($\theta \sim \text{Beta}(\alpha, \beta)$) per coaching mode and technique with a 10% ($\epsilon = 0.10$) exploration floor, Bayesian posterior updates based strictly on session checkout scores (1–5) and one-tap feedback, and user veto management.
-- **Unit & Integration Test Suites**: Policy distribution tests, crypto-shredding unrecoverability tests, and end-to-end database integration tests.
+### Context & Architectural Motivation ("Why")
+In coercive domestic, workplace, or institutional environments, individuals suffering in silence need complete certainty that personal disclosures cannot be forensically recovered from handset storage. Furthermore, small local LLMs require hyper-personalization without central server tracking, ad analytics, or engagement-maximizing reward loops (streaks, gamification). 
+
+Sprint 2 addresses these imperatives by establishing:
+1. **Forensic Zero-Knowledge Persistence**: Memory-hard key derivation and per-record cryptographic deletion ensuring physical flash inspections reveal only unrecoverable ciphertext.
+2. **Anti-Dependency Self-Evolution**: A Bayesian Thompson sampling bandit that personalizes coaching technique selection based strictly on user-reported benefit, never dwell time or retention.
+
+### Added ("What Was Changed")
+
+#### 1. Argon2id Master Key Derivation (`crates/haven-storage/src/crypto.rs`)
+- **Why**: Standard passwords/PINs hashed with fast functions (SHA-256) or weak derivation are vulnerable to GPU brute-force recovery if a device database is exfiltrated.
+- **What**:
+  - Implemented `derive_master_key(pin, salt)` using Argon2id with memory-hard parameters ($m=65536\text{ KiB}, t=3\text{ passes}, p=1\text{ lane}$, 32-byte key).
+  - Derived 256-bit key is wrapped in `MasterVaultKey` implementing `ZeroizeOnDrop`, ensuring plaintext master keys are aggressively wiped from RAM upon deallocation.
+
+#### 2. Per-Record AES-256-GCM Envelope Encryption & Crypto-Shredding (`crates/haven-storage/src/crypto.rs`)
+- **Why**: Flash storage media (NAND flash with wear-leveling) do not overwrite physical memory blocks when a SQLite row is deleted; deleted data remains accessible via chip-off forensic recovery. To provide genuine forensic deletion, each record must carry its own cryptographic lifecycle.
+- **What**:
+  - **Envelope Encryption**: Each memory record generates an ephemeral random 256-bit AES key (`record_key`) and random 96-bit nonce. The plaintext reflection is encrypted using AES-256-GCM.
+  - **Key Wrapping**: The ephemeral `record_key` is encrypted (wrapped) with the user's `MasterVaultKey` using AES-256-GCM and stored in `record_key_wrapped`.
+  - **Instant Crypto-Shredding**: When a user deletes a memory item, `crypto_shred_memory(id)` overwrites `record_key_wrapped` with 48 zeroes in SQLite storage. Without the unwrapped `record_key`, the ciphertext remaining on physical flash blocks is mathematically indecipherable noise. Subsequent decryption attempts fail definitively with `StorageError::RecordShredded`.
+
+#### 3. Relational Storage Manager & Tripartite Memory (`crates/haven-storage/src/storage.rs`, `schema.rs`)
+- **Why**: Human memory is multifaceted. Haven structures on-device memory into three distinct tiers to enable longitudinal continuity without mutating neural network weights.
+- **What**:
+  - Embedded SQLite storage engine with migrations for `sessions`, `memory_items`, `actions`, and `technique_stats`.
+  - **Tripartite Memory Engine**:
+    - *Episodic*: Session journals, key reflections, and takeaway commitments.
+    - *Semantic*: Enduring client profile of values, strengths, themes, and relational boundaries.
+    - *Procedural*: Technique effectiveness matrix and historical bandit weights.
+  - **Stealth Suite Panic-Wipe**: Implemented single-call `panic_wipe()` which zeroizes in-memory master keys and scrambles the SQLite database header on disk with 4096 cryptographically random bytes within 1000ms.
+
+#### 4. Thompson Sampling Contextual Bandit (`crates/haven-core/src/policy.rs`)
+- **Why**: Commercial AI companions reward engagement, dwell time, and conversational volume—fostering unhealthy parasocial dependence. Haven operates under an anti-dependency reward function: it optimizes exclusively for client-reported self-efficacy and session clarity.
+- **What**:
+  - Multi-armed contextual bandit maintaining independent Beta distributions ($\theta_{m,t} \sim \text{Beta}(\alpha_{m,t}, \beta_{m,t})$) per coaching mode ($m \in \{\text{Steady}, \text{Explore}, \text{Build}, \text{Perform}\}$) and coaching technique ($t \in \mathcal{A}$).
+  - Supported Techniques: `ValuesClarification`, `ScalingInquiry`, `StrengthsReframing`, `MicroStepBreakdown`, `PerspectiveShift`, `ExceptionSeeking`, `GroundingBreath`.
+  - **Exploration Floor**: Configured $\epsilon = 0.10$. With 10% probability, selects uniform random technique; with 90% probability, exploits highest sampled $\theta$. Prevents getting trapped in local sub-optimal policies.
+  - **Bayesian Posterior Updates**: Updated strictly via one-tap feedback ("That helped" $\implies +1 \alpha$; "Not quite" $\implies +1 \beta$) and session checkout ratings (scores $4..5 \implies +1 \alpha$; scores $1..2 \implies +1 \beta$; score $3$ is neutral).
+  - **Technique Vetoing**: Users retain sovereign control to permanently blacklist techniques they dislike, completely removing them from candidate selection.
+
+#### 5. Automated Verification Suites (`crates/haven-storage/tests/`, `haven-core/tests/`)
+- Added `crypto_tests.rs`: Validates deterministic Argon2id derivation, wrong PIN rejection, envelope roundtrips, and crypto-shredding unrecoverability.
+- Added `storage_integration_tests.rs`: Validates memory CRUD, shredding verification, session/action relational persistence, bandit technique sync, and panic-wipe header scrambling.
+- Added `policy_tests.rs`: Validates Beta sampling distribution, posterior updates, convergence toward rewarded techniques, exploration floor guarantees, and veto enforcement.
 
 ---
 
 ## [0.1.0] - Sprint 1: Core Engine & Safety Guardian (2026-10-07)
 
-### Added
-- **Cargo Monorepo Scaffolding**: Initialized root workspace with `haven-core`, `haven-storage`, and `haven-infer`.
-- **Deterministic 7-Phase State Machine (`haven-core/state_machine.rs`)**:
-  - Linear flow enforcement: `Contract` $\rightarrow$ `CheckIn` $\rightarrow$ `Focus` $\rightarrow$ `Explore` $\rightarrow$ `Options` $\rightarrow$ `Commit` $\rightarrow$ `Close`.
-  - Distress evaluation in CheckIn with automatic clamping to `Steady` mode.
-  - Client-owned focus agenda gating.
-  - Advice locking in Explore and Commit; advice unlocked only in Options upon explicit user request.
-  - Action commitment confidence threshold ($\ge 8/10$) with forced action shrinkage if lower.
-  - Session checkout score (1–5) capture.
-- **Dual-Tier Safety Guardian (`haven-core/guardian.rs`)**:
-  - Deterministic pre-inference regex filter detecting suicidal ideation, self-harm, domestic violence, and acute distress.
-  - 100% bypass on Red tier with immediate halt of coaching, compassionate non-interrogative response, and verified regional emergency cards.
-  - Deterministic post-inference audit engine enforcing empathetic reflection first, at most one open-ended question, advice locking, and scrubbing of clinical diagnoses and dependency/parasocial phrasing.
-- **Verified Crisis Resources (`resources/crisis_packs/`)**:
-  - JSON emergency packs for UK (999, 116 123), US (911, 988), EU (112), and Global Fallback loaded via `haven-core/crisis.rs`.
-- **Test Suites**:
-  - 16 unit and integration tests covering state transitions, action shrinkage, 100% crisis interception, and post-audit enforcement (`tests/state_machine_tests.rs`, `tests/guardian_tests.rs`).
+### Context & Architectural Motivation ("Why")
+Small local language models (1B–8B parameters) lack inherent moral reasoning and are prone to sycophancy, confabulation, premature advice-giving, and diagnostic overreach. In high-stakes emotional conversations, relying on the LLM's own prompt obedience is unsafe. 
+
+Project Haven resolves this by implementing a **"Thin Native Shell, Heavy Shared Rust Engine"** architecture where conversational flow, ethical standards (ICF coaching compliance), and safety firewalls are enforced deterministically by Rust code before and after inference.
+
+### Added ("What Was Changed")
+
+#### 1. Cargo Monorepo Topology & Toolchain Setup
+- **Why**: Client code (iOS SwiftUI, Android Compose, React PWA) must share identical, audited domain and safety logic without duplicating safety-critical code across Swift, Kotlin, and TypeScript.
+- **What**:
+  - Initialized root Cargo workspace with three member crates:
+    - `crates/haven-core`: Pure domain logic, state machine, safety filters, contextual bandit.
+    - `crates/haven-storage`: Zero-knowledge cryptographic persistence, SQLCipher/SQLite engine.
+    - `crates/haven-infer`: Embedded model runtime abstraction layer (llama.cpp / WebLLM).
+  - Bootstrapped Rust 1.99.0 toolchain with MinGW-w64 GNU compiler backend.
+
+#### 2. Deterministic 7-Phase State Machine (`crates/haven-core/src/state_machine.rs`)
+- **Why**: Real-world certified coaching (ICF) and Motivational Interviewing (OARS) require that the client sets the agenda, explores reality, and owns all action steps. Small models default to advice-giving and conversational drift. The state machine strictly governs the dialogue shape.
+- **What**:
+  - Implemented strict sequential graph transitions:
+    `Contract` $\rightarrow$ `CheckIn` $\rightarrow$ `Focus` $\rightarrow$ `Explore` $\rightarrow$ `Options` $\rightarrow$ `Commit` $\rightarrow$ `Close`.
+  - **State Invariants & Enforcements**:
+    - *Contract*: Must establish session target before advancing.
+    - *CheckIn Distress Auto-Clamp*: If distress or emotional fatigue is flagged, the session mode is automatically clamped to `Steady` (grounding reflections, maximum 3 sentences, zero action pressure).
+    - *Client-Owned Focus Agenda*: In Focus, topic selection is 100% client-driven. Haven is programmatically prevented from choosing or prescribing topics.
+    - *Advice Locking*: Advice generation is strictly locked in Explore and Commit. In Options, advice is locked unless the client explicitly requests ideas (`unlock_advice_by_user_request()`), and Haven must present 2–3 alternatives rather than a single prescriptive instruction.
+    - *Action Confidence Gating & Shrinkage*: In Commit, actions are rated for confidence on a 0–10 scale. If confidence $< 8/10$, advancing to Close is hard-blocked (`ConfidenceTooLowForCommitment`). The client must shrink the action (`shrink_action()`) into an achievable micro-step before closing.
+    - *Close*: Consolidates learnings and captures a 1–5 checkout score to feed procedural learning.
+
+#### 3. Dual-Tier Safety Guardian (`crates/haven-core/src/guardian.rs`)
+- **Why**: Because Haven is completely private and runs on-device without cloud telemetry, human dispatchers cannot intervene in emergencies. Safety must be enforced deterministically on the handset with zero false negatives on acute crisis.
+- **What**:
+  - **Dual-Tier Firewall Architecture**:
+    - *Pre-Inference Scan (Deterministic Rule Engine)*: Evaluates raw user input with compiled regex sets before assembling prompts or invoking the LLM:
+      - `Red Tier (Crisis/Self-Harm)`: Immediate 100% bypass of coaching. Halts session, outputs compassionate presence with zero interrogatives (questions), surfaces pre-authored user safety plans, and displays verified regional emergency cards.
+      - `Amber Tier (Distress/Burnout)`: Clamps session mode to `Steady` and suppresses goal setting.
+      - `Green Tier (Normal)`: Routes to coaching state machine.
+    - *Post-Inference Audit (Deterministic JSON Inspector)*: Inspects LLM draft JSON response prior to rendering:
+      - **Reflection Requirement**: Enforces empathetic reflection (emotional validation/summary) prior to any question.
+      - **Single-Question Rule**: Permits at most ONE open-ended coaching question per turn, suppressing judgmental "why" interrogatives.
+      - **Advice Gate Check**: Rejects and sanitizes turns that offer advice outside the Options phase.
+      - **Clinical & Dependency Scrubbing**: Permanently suppresses diagnostic statements (*"you have clinical depression"*) and parasocial dependency phrases (*"I'm the only one who understands you"*).
+
+#### 4. Verified Offline Crisis Packs (`crates/haven-core/src/crisis.rs`, `resources/crisis_packs/`)
+- **Why**: Crisis intervention must function when the user has airplane mode on, poor cellular signal, or no internet connection.
+- **What**:
+  - Embedded country-specific crisis datasets compiled into the binary:
+    - UK: 999 (Emergency), 116 123 (Samaritans), Shout 85258, NHS 111.
+    - US: 911 (Emergency), 988 (Suicide & Crisis Lifeline), Crisis Text Line 741741.
+    - EU: 112 (European Emergency Number), child helplines.
+    - Global Fallback: Befrienders Worldwide and findahelpline.com directory.
+
+#### 5. Safety & State Machine Test Suites (`crates/haven-core/tests/`)
+- Added `state_machine_tests.rs`: Validates full 7-phase run, invalid transitions, check-in distress clamping, advice locking, action shrinkage, and checkout score bounds.
+- Added `guardian_tests.rs`: Validates 100% interception of crisis prompts, amber distress handling, reflection presence, single question limits, unsolicited advice rejection, and clinical/dependency scrubbing.
