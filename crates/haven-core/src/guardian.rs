@@ -93,10 +93,12 @@ impl Guardian {
         let amber_regex_set = RegexSet::new(&amber_patterns).expect("Invalid Amber Tier regex patterns");
 
         let clinical_patterns = vec![
-            Regex::new(r"(?i)\byou\s+(?:have|suffer\s+from|are\s+diagnosed\s+with)\s+(?:clinical\s+depression|depression|bipolar|schizophrenia|bpd|ptsd|ocd|adhd|anxiety\s+disorder)\b").unwrap(),
+            Regex::new(r"(?i)\byou\s+(?:have|suffer\s+from|are\s+diagnosed\s+with)\s+(?:clinical\s+depression|depression|bipolar|schizophrenia|bpd|borderline\s+personality\s+disorder|personality\s+disorder|ptsd|ocd|adhd|anxiety\s+disorder|eating\s+disorder|psychosis)\b").unwrap(),
+            Regex::new(r"(?i)\byou\s+are\s+diagnosed\s+with\b").unwrap(),
             Regex::new(r"(?i)\bmy\s+diagnosis\s+is\b").unwrap(),
             Regex::new(r"(?i)\bas\s+your\s+therapist\b").unwrap(),
             Regex::new(r"(?i)\bpsychiatric\s+assessment\b").unwrap(),
+            Regex::new(r"(?i)\bclinical\s+assessment\b").unwrap(),
         ];
 
         let dependency_patterns = vec![

@@ -22,3 +22,7 @@ pretty_assertions.workspace = true
 [[test]]
 name = "vertical_slice_cli"
 path = "../../tests/vertical_slice_cli.rs"
+
+[[test]]
+name = "redteam_safety_tests"
+path = "../../tests/redteam_safety_tests.rs"
