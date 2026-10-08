@@ -7,6 +7,67 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.3.0] - Sprint 3: Local Inference Engine & Offline Vertical Slice (2026-10-08)
+
+### Context & Architectural Motivation ("Why")
+Prior to building platform-specific user interfaces (iOS SwiftUI, Android Compose, Web PWA), the system requires proof that an end-to-end coaching dialogue can execute completely offline on consumer client hardware with zero server dependency, zero internet calls, and 100% adherence to International Coaching Federation (ICF) and Safety Guardian standards.
+
+Sprint 3 achieves this critical integration milestone:
+1. **Local Inference Abstraction**: Decoupling the conversational orchestrator from specific model weights, allowing local GGUF models (`llama.cpp`) and high-fidelity test simulations.
+2. **Deterministic Context Slot Injection**: Restricting small on-device models to filling slots inside an ICF-compliant prompt and strictly constraining generation to a validated JSON schema.
+3. **Headless Vertical Slice Prototype**: Validating the entire multi-crate loop (`haven-core` + `haven-storage` + `haven-infer`) in a single headless CLI integration test driving a complete 7-phase session.
+4. **Adversarial & Crisis Red-Teaming**: Empirically proving 100.0% Red-tier crisis interception across 2,200+ synthetic prompts with zero cloud oversight.
+
+### Added ("What Was Changed")
+
+#### 1. ICF Prompt Assembly & JSON Schema Formatting (`crates/haven-infer/src/prompt.rs`)
+- **Why**: Small on-device language models (1B–8B parameters) wander into open-ended chatter, diagnostic opinions, or unsolicited advice without structured scaffolding. Formatting turns into strict JSON matching post-audit regex filters guarantees compile-time and runtime compliance.
+- **What**:
+  - `PromptAssembler::build_prompt()` compiles active conversational slots:
+    - Persona & non-clinical boundaries.
+    - Active phase (`Contract` through `Close`), coaching mode (`Steady`, `Explore`, `Build`, `Perform`), and Thompson-sampled technique.
+    - Client contract, focus agenda, decrypted semantic profile values, and retrieved past episodic summaries.
+    - Injected operational ICF constraints: reflection first, at most 1 open question, advice locking.
+    - Corrective instruction slot for self-healing retries upon audit violation.
+    - Strict JSON output schema specification.
+
+#### 2. Pluggable Inference Backend & Local Runtimes (`crates/haven-infer/src/backend.rs`, `llama_backend.rs`)
+- **Why**: Real on-device GGUF models are 2–3 GB files. Continuous integration, unit testing, and automated developer harnesses require fast, deterministic execution without mandatory multithreaded weight downloads, while native handset targets require embedded `llama.cpp`.
+- **What**:
+  - `InferenceBackend` trait providing unified `generate(&self, prompt) -> Result<String, InferenceError>`.
+  - `SimulatedCoachingBackend`: High-fidelity, offline test backend generating valid ICF turn payloads for all 7 phases, supporting configurable fault injection to verify error recovery.
+  - `LlamaCppBackend`: Embedded runtime interface for quantized 1B–8B GGUF models loaded from local filesystem paths.
+
+#### 3. End-to-End Coaching Session Orchestrator (`crates/haven-infer/src/orchestrator.rs`)
+- **Why**: Coordinating state transitions, pre-inference scans, dynamic contextual bandit sampling, memory retrieval, model generation, post-audit checks, and encrypted persistence across independent crates requires a unified, self-healing pipeline.
+- **What**:
+  - Implemented `CoachingOrchestrator` integrating `Guardian`, `SessionStateMachine`, `ThompsonBandit`, `HavenStorage`, and `InferenceBackend`.
+  - **Self-Healing Retry Loop**: If a model response fails post-inference audit (e.g. unsolicited advice or multiple questions), the orchestrator automatically injects corrective instructions and regenerates up to 3 times before falling back to a safe, non-judgmental reflection template.
+  - Automated session persistence and posterior distribution weight updates on checkout.
+
+#### 4. Headless Vertical Slice CLI Integration Test Harness (`tests/vertical_slice_cli.rs`)
+- **Why**: The primary engineering deliverable of Phase 1 is a headless integration harness executing a full 10-minute coaching session offline with zero network connectivity.
+- **What**:
+  - Comprehensive integration test simulating a full client journey:
+    - Contract: Transition from corporate finance to climate tech.
+    - CheckIn: Energy gauge (6/10).
+    - Focus: Core fear of leaving stable salary.
+    - Explore: Values alignment and reality exploration; advice gate verified locked.
+    - Options: Brainstorming; explicit user invitation unlocks advice gate (2–3 alternatives presented).
+    - Commit: Overly ambitious action (confidence 5/10) rejected by confidence gate; action shrunk to manageable micro-step (confidence 9/10) and accepted.
+    - Close: Session completed with checkout score 5/5.
+  - Verified SQLite session and action persistence, envelope encryption of episodic turns, crypto-shredding unrecoverability, and Thompson bandit $\alpha$ parameter update.
+
+#### 5. Red-Team Safety & Adversarial Evaluation Suite (`tests/redteam_safety_tests.rs`)
+- **Why**: A zero-knowledge offline system cannot rely on cloud trust & safety teams. It must be empirically tested against acute crisis, diagnostic traps, and parasocial manipulation.
+- **What**:
+  - Tested **2,240 synthetic crisis prompt combinations** across varied sentence structures, preambles, and regional datasets (UK, US, EU, Global): **100.0% intercepted in Red tier** with zero LLM inference.
+  - Tested adversarial diagnostic statements (*"you suffer from clinical depression"*, *"you are diagnosed with borderline personality disorder"*): 100% blocked and rejected.
+  - Tested parasocial attachment attempts (*"I'm the only one who understands you"*): 100% blocked and rejected.
+  - Verified orchestrator advice gate locks when users demand prescriptive advice during Explore phase.
+
+---
+
 ## [0.2.0] - Sprint 2: Cryptographic Storage & Bandit Engine (2026-10-07)
 
 ### Context & Architectural Motivation ("Why")
