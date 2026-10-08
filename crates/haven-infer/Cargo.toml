@@ -18,3 +18,7 @@ rand.workspace = true
 
 [dev-dependencies]
 pretty_assertions.workspace = true
+
+[[test]]
+name = "vertical_slice_cli"
+path = "../../tests/vertical_slice_cli.rs"
