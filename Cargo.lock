@@ -335,12 +335,16 @@ dependencies = [
 name = "haven-infer"
 version = "0.1.0"
 dependencies = [
+ "chrono",
  "haven-core",
+ "haven-storage",
  "pretty_assertions",
+ "rand",
  "serde",
  "serde_json",
  "thiserror",
  "tracing",
+ "uuid",
 ]
 
 [[package]]
