@@ -1,10 +1,11 @@
-//! haven-core: Core domain logic, state machine, safety guardian, and contextual bandit.
+//! haven-core: Core domain logic, state machine, safety guardian, contextual bandit, and FFI bindings.
 //!
 //! Enforces zero-knowledge, deterministic conversation flow,
 //! and International Coaching Federation (ICF) boundaries.
 
 pub mod crisis;
 pub mod error;
+pub mod ffi;
 pub mod guardian;
 pub mod policy;
 pub mod state_machine;
