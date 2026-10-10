@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS memory_items (
     id TEXT PRIMARY KEY,
     kind TEXT NOT NULL CHECK(kind IN ('episodic', 'semantic', 'procedural')),
     body BLOB NOT NULL,
+    embedding BLOB,
     nonce BLOB NOT NULL,
     record_key_wrapped BLOB NOT NULL,
     wrapped_key_nonce BLOB NOT NULL,

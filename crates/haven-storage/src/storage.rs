@@ -54,11 +54,53 @@ impl FromStr for MemoryKind {
     }
 }
 
+pub fn serialize_embedding(embedding: &[f32]) -> Vec<u8> {
+    let mut bytes = Vec::with_capacity(embedding.len() * 4);
+    for val in embedding {
+        bytes.extend_from_slice(&val.to_le_bytes());
+    }
+    bytes
+}
+
+pub fn deserialize_embedding(bytes: &[u8]) -> Vec<f32> {
+    if bytes.len() % 4 != 0 {
+        return Vec::new();
+    }
+    let count = bytes.len() / 4;
+    let mut embedding = Vec::with_capacity(count);
+    for chunk in bytes.chunks_exact(4) {
+        let arr: [u8; 4] = chunk.try_into().unwrap();
+        embedding.push(f32::from_le_bytes(arr));
+    }
+    embedding
+}
+
+pub fn cosine_similarity(a: &[f32], b: &[f32]) -> f32 {
+    if a.len() != b.len() || a.is_empty() {
+        return 0.0;
+    }
+    let mut dot = 0.0f32;
+    let mut norm_a = 0.0f32;
+    let mut norm_b = 0.0f32;
+    for (x, y) in a.iter().zip(b.iter()) {
+        dot += x * y;
+        norm_a += x * x;
+        norm_b += y * y;
+    }
+    let denom = norm_a.sqrt() * norm_b.sqrt();
+    if denom == 0.0 {
+        0.0
+    } else {
+        dot / denom
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct MemoryItem {
     pub id: Uuid,
     pub kind: MemoryKind,
     pub body: String,
+    pub embedding: Option<Vec<f32>>,
     pub importance: f32,
     pub last_used: DateTime<Utc>,
     pub user_pinned: bool,
@@ -117,22 +159,45 @@ impl HavenStorage {
         body: &str,
         importance: f32,
     ) -> Result<Uuid, StorageError> {
+        self.insert_memory_internal(kind, body, None, importance)
+    }
+
+    /// Stores a memory item with an associated vector embedding and envelope encryption.
+    pub fn insert_memory_with_embedding(
+        &self,
+        kind: MemoryKind,
+        body: &str,
+        embedding: &[f32],
+        importance: f32,
+    ) -> Result<Uuid, StorageError> {
+        self.insert_memory_internal(kind, body, Some(embedding), importance)
+    }
+
+    fn insert_memory_internal(
+        &self,
+        kind: MemoryKind,
+        body: &str,
+        embedding: Option<&[f32]>,
+        importance: f32,
+    ) -> Result<Uuid, StorageError> {
         let id = Uuid::new_v4();
         let encrypted = encrypt_record(&self.master_key, body.as_bytes())?;
         let now_timestamp = Utc::now().timestamp();
+        let embedding_blob = embedding.map(serialize_embedding);
 
         let conn = self.conn.lock().unwrap();
         conn.execute(
             r#"
             INSERT INTO memory_items (
-                id, kind, body, nonce, record_key_wrapped, wrapped_key_nonce,
+                id, kind, body, embedding, nonce, record_key_wrapped, wrapped_key_nonce,
                 importance, last_used, user_pinned, user_hidden, is_shredded
-            ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, 0, 0, 0)
+            ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, 0, 0, 0)
             "#,
             params![
                 id.to_string(),
                 kind.as_str(),
                 encrypted.ciphertext,
+                embedding_blob,
                 &encrypted.nonce[..],
                 encrypted.wrapped_record_key,
                 &encrypted.wrapped_key_nonce[..],
@@ -150,7 +215,7 @@ impl HavenStorage {
         let mut stmt = conn.prepare(
             r#"
             SELECT kind, body, nonce, record_key_wrapped, wrapped_key_nonce,
-                   importance, last_used, user_pinned, user_hidden, is_shredded
+                   importance, last_used, user_pinned, user_hidden, is_shredded, embedding
             FROM memory_items WHERE id = ?1
             "#,
         )?;
@@ -172,6 +237,8 @@ impl HavenStorage {
             let last_used_ts: i64 = row.get(6)?;
             let user_pinned: i32 = row.get(7)?;
             let user_hidden: i32 = row.get(8)?;
+            let embedding_bytes: Option<Vec<u8>> = row.get(10)?;
+            let embedding = embedding_bytes.map(|b| deserialize_embedding(&b));
 
             let mut nonce = [0u8; 12];
             nonce.copy_from_slice(&nonce_bytes);
@@ -194,6 +261,7 @@ impl HavenStorage {
                 id,
                 kind,
                 body,
+                embedding,
                 importance,
                 last_used: Utc.timestamp_opt(last_used_ts, 0).single().unwrap_or_else(Utc::now),
                 user_pinned: user_pinned != 0,
@@ -205,8 +273,8 @@ impl HavenStorage {
         }
     }
 
-    /// Crypto-shreds a memory record by overwriting its wrapped key with zeroes in storage.
-    /// After this call, the encrypted body on flash is permanently undecipherable.
+    /// Crypto-shreds a memory record by overwriting its wrapped key, body, and embedding with zeroes.
+    /// After this call, the encrypted body and vector on flash are permanently undecipherable.
     pub fn crypto_shred_memory(&self, id: Uuid) -> Result<(), StorageError> {
         let conn = self.conn.lock().unwrap();
         let zeroized_wrapped_key = vec![0u8; 48]; // 32 bytes key + 16 bytes auth tag
@@ -216,6 +284,7 @@ impl HavenStorage {
             UPDATE memory_items
             SET record_key_wrapped = ?1,
                 body = zeroblob(16),
+                embedding = zeroblob(16),
                 is_shredded = 1
             WHERE id = ?2
             "#,
@@ -227,6 +296,32 @@ impl HavenStorage {
         } else {
             Ok(())
         }
+    }
+
+    /// Searches memories by cosine vector similarity, returning top_k matches sorted descending by similarity.
+    pub fn search_similar_memories(
+        &self,
+        query_embedding: &[f32],
+        kind_filter: Option<MemoryKind>,
+        top_k: usize,
+    ) -> Result<Vec<(MemoryItem, f32)>, StorageError> {
+        let memories = self.list_memories(kind_filter)?;
+        let mut scored: Vec<(MemoryItem, f32)> = memories
+            .into_iter()
+            .filter_map(|m| {
+                if let Some(ref emb) = m.embedding {
+                    let score = cosine_similarity(query_embedding, emb);
+                    Some((m, score))
+                } else {
+                    None
+                }
+            })
+            .collect();
+
+        // Sort descending by similarity score
+        scored.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
+        scored.truncate(top_k);
+        Ok(scored)
     }
 
     /// Lists all non-shredded memories, optionally filtered by kind.
