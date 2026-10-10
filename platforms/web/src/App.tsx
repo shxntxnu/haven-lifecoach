@@ -7,8 +7,12 @@ import { ActionShrinkageModal } from './components/ActionShrinkageModal';
 import { CrisisModal } from './components/CrisisModal';
 import { CalculatorDisguise } from './components/CalculatorDisguise';
 import { CheckoutModal } from './components/CheckoutModal';
+import { ModelProgressHUD } from './components/ModelProgressHUD';
+import { VaultAuthModal } from './components/VaultAuthModal';
+import { DecoyVaultView } from './components/DecoyVaultView';
 import { ChatMessage, OperatingMode, SessionPhase } from './types';
-import { generateCoachResponse, runPreScan } from './engine';
+import { AVAILABLE_MODELS, generateCoachResponse, runPreScan } from './engine';
+import { webllm, WebLLMProgress } from './webllm';
 import { Send, RotateCcw } from 'lucide-react';
 
 export const App: React.FC = () => {
@@ -16,9 +20,17 @@ export const App: React.FC = () => {
   const [disguiseMode, setDisguiseMode] = useState<boolean>(false);
   const [quietMode, setQuietMode] = useState<boolean>(false);
   const [panicWiped, setPanicWiped] = useState<boolean>(false);
+  const [vaultLocked, setVaultLocked] = useState<boolean>(false);
+  const [inDecoyMode, setInDecoyMode] = useState<boolean>(false);
 
   // Model Selection - Default to Llama-3.2-3B-Instruct (128k Context Window)
   const [selectedModelId, setSelectedModelId] = useState<string>('llama-3.2-3b-128k');
+  const [webllmProgress, setWebllmProgress] = useState<WebLLMProgress>({
+    progress: 0,
+    text: 'Click "Load WebGPU Weights" to compile into browser VRAM.',
+    isLoaded: false,
+    isLoading: false,
+  });
 
   // Coaching Engine State
   const [currentPhase, setCurrentPhase] = useState<SessionPhase>('Contract');
@@ -45,6 +57,11 @@ export const App: React.FC = () => {
     },
   ]);
 
+  // Handle WebGPU Model Initialization
+  const handleInitWebGPU = async () => {
+    await webllm.loadModel(selectedModelId, (p) => setWebllmProgress(p));
+  };
+
   // Handle Panic Wipe (1000ms panic button)
   const handlePanicWipe = () => {
     // 1. Scramble & purge in-memory dialogue
@@ -58,7 +75,7 @@ export const App: React.FC = () => {
   };
 
   // Handle User Input Submission
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (!inputText.trim()) return;
 
     const userText = inputText.trim();
@@ -89,32 +106,81 @@ export const App: React.FC = () => {
       timestamp: Date.now(),
     };
 
-    const updatedMessages = [...messages, newMsg];
-    setMessages(updatedMessages);
+    setMessages((prev) => [...prev, newMsg]);
 
-    // Generate compliant coach response from local model / engine
-    setTimeout(() => {
-      const coachResp = generateCoachResponse(currentPhase, userText, effectiveMode);
+    // Check if WebGPU engine is initialized for active model
+    const isWebGPUActive = selectedModelId !== 'simulated-airgap' && webllm.isReady(selectedModelId);
 
+    if (isWebGPUActive) {
+      const coachTurnId = `coach-${Date.now()}`;
       setMessages((prev) => [
         ...prev,
         {
-          id: `coach-${Date.now()}`,
+          id: coachTurnId,
           sender: 'coach',
-          reflection: coachResp.reflection,
-          inquiry: coachResp.inquiry,
-          technique: coachResp.technique,
+          reflection: 'Attuning to your words in on-device WebGPU VRAM...',
+          inquiry: '',
+          technique: 'Llama-3.2-3B Neural Inference (128k)',
           timestamp: Date.now(),
         },
       ]);
 
-      if (coachResp.suggestedNextPhase) {
-        setCurrentPhase(coachResp.suggestedNextPhase);
+      const systemPrompt = `You are Haven, an air-gapped ICF-compliant coaching partner. Phase: ${currentPhase}, Mode: ${effectiveMode}. Output a reflective response acknowledging the client first, followed by exactly ONE open question. Avoid unsolicited advice.`;
+
+      try {
+        const turn = await webllm.generateCoachingTurn(systemPrompt, userText);
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === coachTurnId
+              ? {
+                  ...m,
+                  reflection: turn.reflection,
+                  inquiry: turn.inquiry,
+                }
+              : m
+          )
+        );
+      } catch (err: any) {
+        // Fallback to deterministic simulation if WebGPU fails
+        const fallback = generateCoachResponse(currentPhase, userText, effectiveMode);
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === coachTurnId
+              ? {
+                  ...m,
+                  reflection: fallback.reflection,
+                  inquiry: fallback.inquiry,
+                  technique: `${fallback.technique} (Simulation Fallback)`,
+                }
+              : m
+          )
+        );
       }
-      if (coachResp.suggestedMode) {
-        setOperatingMode(coachResp.suggestedMode);
-      }
-    }, 400);
+    } else {
+      // Deterministic Simulation engine (Zero download / instant execution)
+      setTimeout(() => {
+        const coachResp = generateCoachResponse(currentPhase, userText, effectiveMode);
+
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: `coach-${Date.now()}`,
+            sender: 'coach',
+            reflection: coachResp.reflection,
+            inquiry: coachResp.inquiry,
+            technique: coachResp.technique,
+            timestamp: Date.now(),
+          },
+        ]);
+
+        if (coachResp.suggestedNextPhase) {
+          setCurrentPhase(coachResp.suggestedNextPhase);
+        }
+        if (coachResp.suggestedMode) {
+          setOperatingMode(coachResp.suggestedMode);
+        }
+      }, 400);
+    }
   };
 
   // Advance from Commit to Close once action confidence is verified
@@ -181,6 +247,13 @@ export const App: React.FC = () => {
     return <CalculatorDisguise onUnlock={() => setDisguiseMode(false)} />;
   }
 
+  // If decoy vault is active, render the generic personal notes
+  if (inDecoyMode) {
+    return <DecoyVaultView onRelock={() => setInDecoyMode(false)} />;
+  }
+
+  const currentModelMeta = AVAILABLE_MODELS.find((m) => m.id === selectedModelId) || AVAILABLE_MODELS[0];
+
   return (
     <div className="haven-app">
       <Header
@@ -188,12 +261,22 @@ export const App: React.FC = () => {
         onPanicWipe={handlePanicWipe}
         quietMode={quietMode}
         onToggleQuietMode={() => setQuietMode(!quietMode)}
+        onLockVault={() => setVaultLocked(true)}
       />
 
       <ModelSelector
         selectedModelId={selectedModelId}
         onSelectModel={setSelectedModelId}
       />
+
+      {selectedModelId !== 'simulated-airgap' && (
+        <ModelProgressHUD
+          modelName={currentModelMeta.name}
+          progress={webllmProgress}
+          onInitialize={handleInitWebGPU}
+          onFallbackToSim={() => setSelectedModelId('simulated-airgap')}
+        />
+      )}
 
       <PhaseTimeline
         currentPhase={currentPhase}
@@ -275,6 +358,16 @@ export const App: React.FC = () => {
 
       {showCheckout && (
         <CheckoutModal onComplete={handleCheckoutComplete} />
+      )}
+
+      {vaultLocked && (
+        <VaultAuthModal
+          onUnlockMaster={() => setVaultLocked(false)}
+          onUnlockDecoy={() => {
+            setVaultLocked(false);
+            setInDecoyMode(true);
+          }}
+        />
       )}
     </div>
   );

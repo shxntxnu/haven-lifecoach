@@ -1,11 +1,12 @@
 import React from 'react';
-import { Shield, Calculator, AlertTriangle, BellOff, Bell } from 'lucide-react';
+import { Shield, Calculator, AlertTriangle, BellOff, Bell, Lock } from 'lucide-react';
 
 interface HeaderProps {
   onToggleDisguise: () => void;
   onPanicWipe: () => void;
   quietMode: boolean;
   onToggleQuietMode: () => void;
+  onLockVault?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -13,6 +14,7 @@ export const Header: React.FC<HeaderProps> = ({
   onPanicWipe,
   quietMode,
   onToggleQuietMode,
+  onLockVault,
 }) => {
   return (
     <header className="haven-header">
@@ -46,6 +48,17 @@ export const Header: React.FC<HeaderProps> = ({
         >
           <Calculator size={18} />
         </button>
+
+        {onLockVault && (
+          <button
+            className="icon-btn"
+            onClick={onLockVault}
+            title="Lock Vault with PIN"
+            aria-label="Lock Vault"
+          >
+            <Lock size={18} />
+          </button>
+        )}
 
         <button
           className="icon-btn danger"
