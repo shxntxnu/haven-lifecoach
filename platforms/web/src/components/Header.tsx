@@ -1,0 +1,61 @@
+import React from 'react';
+import { Shield, Calculator, AlertTriangle, BellOff, Bell } from 'lucide-react';
+
+interface HeaderProps {
+  onToggleDisguise: () => void;
+  onPanicWipe: () => void;
+  quietMode: boolean;
+  onToggleQuietMode: () => void;
+}
+
+export const Header: React.FC<HeaderProps> = ({
+  onToggleDisguise,
+  onPanicWipe,
+  quietMode,
+  onToggleQuietMode,
+}) => {
+  return (
+    <header className="haven-header">
+      <div className="brand-section">
+        <div className="brand-logo" title="Haven AI Companion">
+          <Shield size={20} />
+        </div>
+        <div className="brand-info">
+          <h1>
+            Haven
+            <span className="zk-badge">Zero-Knowledge</span>
+          </h1>
+        </div>
+      </div>
+
+      <div className="header-actions">
+        <button
+          className="icon-btn"
+          onClick={onToggleQuietMode}
+          title={quietMode ? 'Quiet Mode Active (All badges/notifications muted)' : 'Enable Quiet Mode'}
+          aria-label="Toggle Quiet Mode"
+        >
+          {quietMode ? <BellOff size={18} color="#34d399" /> : <Bell size={18} />}
+        </button>
+
+        <button
+          className="icon-btn"
+          onClick={onToggleDisguise}
+          title="Disguise Mode (Quickly swap to Calculator)"
+          aria-label="Disguise as Calculator"
+        >
+          <Calculator size={18} />
+        </button>
+
+        <button
+          className="icon-btn danger"
+          onClick={onPanicWipe}
+          title="Panic Wipe (Immediate cryptographic shred & wipe)"
+          aria-label="Panic Wipe"
+        >
+          <AlertTriangle size={18} />
+        </button>
+      </div>
+    </header>
+  );
+};
