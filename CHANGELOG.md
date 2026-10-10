@@ -7,6 +7,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.5.0] - Sprint 5: Real On-Device WebGPU Inference, Vector Memory & Decoy Vault (2026-10-10)
+
+### Context & Architectural Motivation ("Why")
+Sprint 5 advances Project Haven from simulated dialogue into **real local neural inference, longitudinal vector memory, and coercive threat protection**:
+1. **Neural Hardware Acceleration**: Moving from deterministic simulation to real local model execution requires executing quantized weights on-device without cloud egress. WebGPU gives client browsers direct access to hardware GPU shaders, enabling real-time token streaming for **`Llama-3.2-3B-Instruct` (128k context)** directly in device VRAM with zero external API calls.
+2. **Longitudinal Semantic Retrieval**: As clients complete multiple sessions, episodic reflections and living semantic profiles expand. On-device vector similarity search allows retrieving the top-$k$ most contextually relevant past insights, values, and commitments to inject into prompt slots, preserving longitudinal context without token bloat.
+3. **Plausible Deniability Under Duress**: For users in high-risk or coercive environments (e.g. shared devices or abusive relationships), hiding the app behind a calculator is insufficient if an adversary demands the PIN. The dual-PIN Decoy Vault provides sovereign privacy by unsealing an innocuous personal organizer when the secondary decoy PIN is entered.
+
+### Added ("What Was Changed")
+
+#### 1. On-Device Cosine Vector Similarity Search (`crates/haven-storage/src/storage.rs`, `schema.rs`, `tests/vector_search_tests.rs`)
+- **Why**: Allows semantic retrieval of client values and past episodic themes to populate `PromptAssembler` slots without transmitting embeddings to any third party.
+- **What**:
+  - Added `embedding BLOB` to `memory_items` schema table.
+  - Implemented `serialize_embedding` and `deserialize_embedding` for compact little-endian byte storage.
+  - Implemented `cosine_similarity` for normalized vector dot-products.
+  - Implemented `insert_memory_with_embedding` and `search_similar_memories(query_embedding, kind_filter, top_k)`.
+  - Updated `crypto_shred_memory()` to zeroize vector embeddings on flash storage alongside body ciphertext and wrapped keys.
+  - Added comprehensive integration test [`tests/vector_search_tests.rs`](file:///d:/Documents/_MyStuff/Projects/haven-lifecoach/crates/haven-storage/tests/vector_search_tests.rs) verifying semantic similarity rankings, top-$k$ truncation, kind filtering, and post-shred exclusion.
+
+#### 2. In-Browser WebGPU WebLLM Engine (`platforms/web/src/webllm.ts`, `components/ModelProgressHUD.tsx`)
+- **Why**: Enables client browsers to load and execute 4-bit quantized weights (`Llama-3.2-3B-Instruct`, `Llama-3.2-1B-Instruct`, `Phi-3.5-mini`) directly in device VRAM with real-time token streaming.
+- **What**:
+  - Integrated `@mlc-ai/web-llm` with WebGPU hardware availability detection.
+  - Implemented `ModelProgressHUD` reporting download percentage, shader compilation, and VRAM caching status.
+  - Implemented token streaming and ICF JSON turn parsing in `App.tsx` with graceful fallback to instant simulation.
+
+#### 3. Plausible Deniability Decoy Vault (`platforms/web/src/components/VaultAuthModal.tsx`, `DecoyVaultView.tsx`)
+- **Why**: Protects users from coerced disclosure by providing a secondary PIN that unseals an innocuous personal planner.
+- **What**:
+  - Implemented `VaultAuthModal` with dual-PIN recognition (Master PIN `1234` vs. Decoy PIN `0000`).
+  - Implemented `DecoyVaultView` rendering a realistic routine task checklist and study notes planner with zero trace of coaching dialogue.
+  - Added Lock Vault button to header allowing clients to secure their sanctuary at any moment.
+
+---
+
 ## [0.4.0] - Sprint 4: Platform Bindings & PWA Presentation Tier (2026-10-10)
 
 ### Context & Architectural Motivation ("Why")
