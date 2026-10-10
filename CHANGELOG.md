@@ -7,6 +7,61 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.4.0] - Sprint 4: Platform Bindings & PWA Presentation Tier (2026-10-10)
+
+### Context & Architectural Motivation ("Why")
+Project Haven requires transitioning from a headless command-line slice to production client tiers while strictly following the **"Thin Native Shell, Shared Rust Engine"** design principle:
+1. **Zero-Knowledge Core Preservation**: Core domain governance (safety guardian firewalls, state machine transitions, contextual bandit policy, and Argon2id/AES-256-GCM envelope encryption) must never be rewritten in JavaScript or platform native languages. Instead, C-compatible FFI and WebAssembly (`wasm32-unknown-unknown`) bridges expose the single audited Rust engine directly to native operating systems and air-gapped web browsers.
+2. **Context-Preserving Local Inference**: To deliver on Project Haven's promise of personalized, longitudinal growth without cloud surveillance, on-device models must not lose conversational context across multi-session contracts, agendas, and commitments. We establish a local model selection architecture centered on **Llama-3.2-3B-Instruct with a 128,000-token context window**, guaranteeing zero context truncation on modern consumer devices.
+3. **Calm, High-Aesthetic Sanctuary**: Coaching clients require an environment that inspires confidence and calm. The presentation tier features a pure Vanilla CSS design system with an obsidian/slate dark theme, glassmorphic cards, fluid typography (Outfit / Inter), and responsive touch controls.
+4. **Suffering in Silence / Stealth Suite**: For clients navigating sensitive personal or domestic situations, privacy from shoulder-surfing is essential. Sprint 4 delivers a fully functional Calculator disguise mode, a quiet mode toggle, and an instantaneous (&lt;1000ms) cryptographic panic-wipe trigger.
+
+### Added ("What Was Changed")
+
+#### 1. Cross-Platform C-ABI FFI Foreign Function Interface (`crates/haven-core/src/ffi.rs`, `tests/ffi_bindings_tests.rs`)
+- **Why**: Bridges the compiled Rust engine to iOS (Swift) and Android (Kotlin) presentation shells via UniFFI/C-ABI foreign function boundaries without logic duplication.
+- **What**:
+  - Exported extern `"C"` bindings for session lifecycle (`haven_session_new`, `haven_session_advance`).
+  - Implemented C-compatible Safety Guardian pre-scanning (`haven_guardian_pre_scan`) and post-inference audit verification (`haven_guardian_post_audit`).
+  - Implemented contextual Thompson Bandit technique sampling (`haven_bandit_select_technique`) and posterior feedback recording (`haven_bandit_record_feedback`).
+  - Added dedicated integration test suite [`tests/ffi_bindings_tests.rs`](file:///d:/Documents/_MyStuff/Projects/haven-lifecoach/tests/ffi_bindings_tests.rs) verifying memory safety, string marshaling, handle lifecycles, and panic-free FFI interop.
+
+#### 2. WebAssembly Client Engine (`crates/haven-core/src/wasm.rs`)
+- **Why**: Enables client web browsers to execute Haven domain logic directly on-device with zero server egress and complete cryptographic air-gapping.
+- **What**:
+  - Implemented `WasmHavenEngine`, `WasmSessionState`, and `WasmPreScanResult` using `wasm-bindgen` with JS-friendly serializable types.
+  - Unit tests verifying browser-compatible state machine transitions and safety checks directly within `haven-core`.
+
+#### 3. React 18 + Vite PWA Presentation Tier (`platforms/web/`)
+- **Why**: Delivers a state-of-the-art, calm client application that translates ICF competencies, safety boundaries, and local on-device inference into an intuitive user experience.
+- **What**:
+  - **Pure Vanilla CSS Design System (`platforms/web/src/index.css`)**:
+    - Deep obsidian/slate palette (`#080c14`, `#0d1524`, `#152238`) with calming teal/sage accents (`#14b8a6`, `#10b981`).
+    - Glassmorphic panels with backdrop filters, subtle glowing borders, and fluid typography stack (Outfit / Inter).
+    - Mobile-first, responsive touch viewport layout adhering to Apple web app standards.
+  - **7-Phase ICF Journey Stepper (`platforms/web/src/components/PhaseTimeline.tsx`)**:
+    - Visual stepper tracking progression from `Contract` through `Close`.
+    - Dynamic operating mode badges (`Steady`, `Explore`, `Build`, `Perform`).
+  - **Dialogue Thread (`platforms/web/src/components/DialogueFeed.tsx`)**:
+    - Distinct visual presentation separating empathetic reflections from open coaching inquiries.
+    - Technique attribution badge displaying active Thompson-sampled techniques.
+  - **Action Formulation & Shrinkage Protocol (`platforms/web/src/components/ActionShrinkageModal.tsx`)**:
+    - Interactive 0–10 confidence slider strictly gating actions under 8/10.
+    - Automated action shrinkage guidance prompting micro-steps when confidence &lt; 8.
+  - **Session Close & Checkout Scoring (`platforms/web/src/components/CheckoutModal.tsx`)**:
+    - 1–5 checkout score rating and technique feedback updating the contextual bandit's Beta distribution.
+  - **Context-Preserving Local Model Selector (`platforms/web/src/components/ModelSelector.tsx`)**:
+    - Prominently features **Llama-3.2-3B-Instruct (128k Context Window — Recommended: Zero Context Loss)**.
+    - Offers **Llama-3.2-1B-Instruct (128k Context)** for low-RAM mobile devices, **Phi-3.5-mini-instruct (128k Context)** for complex reasoning, and an instant **Air-Gapped Simulation Engine** for environments without WebGPU.
+  - **Stealth Suite (`platforms/web/src/components/Header.tsx`, `CalculatorDisguise.tsx`)**:
+    - *Quiet Mode*: Full suppression of system notifications and badging.
+    - *Disguise Mode*: Instant toggle replacing Haven with a fully functional arithmetic calculator (with stealth unlock code `42=`).
+    - *Panic-Wipe Gesture*: Instantaneous (&lt;1000ms) cryptographic destruction of in-memory dialogues and keys that immediately flips to the disguise view.
+  - **Emergency Safety Overlay (`platforms/web/src/components/CrisisModal.tsx`)**:
+    - 100% Red-tier pre-scan bypass displaying verified regional helplines (UK 111/999/Samaritans, US 988/Crisis Text Line, EU 112, Global) and halting all coaching dialogue.
+
+---
+
 ## [0.3.0] - Sprint 3: Local Inference Engine & Offline Vertical Slice (2026-10-08)
 
 ### Context & Architectural Motivation ("Why")
