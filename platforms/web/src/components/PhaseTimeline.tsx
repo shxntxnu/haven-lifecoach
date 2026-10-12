@@ -8,13 +8,13 @@ interface PhaseTimelineProps {
 }
 
 const PHASES: { id: SessionPhase; label: string; index: number }[] = [
-  { id: 'Contract', label: '1. Contract', index: 1 },
+  { id: 'Contract', label: '1. Arrive', index: 1 },
   { id: 'CheckIn', label: '2. Check-In', index: 2 },
-  { id: 'Focus', label: '3. Focus', index: 3 },
-  { id: 'Explore', label: '4. Explore', index: 4 },
-  { id: 'Options', label: '5. Options', index: 5 },
-  { id: 'Commit', label: '6. Commit', index: 6 },
-  { id: 'Close', label: '7. Close', index: 7 },
+  { id: 'Focus', label: '3. The Heart', index: 3 },
+  { id: 'Explore', label: '4. Looking In', index: 4 },
+  { id: 'Options', label: '5. New Paths', index: 5 },
+  { id: 'Commit', label: '6. Little Step', index: 6 },
+  { id: 'Close', label: '7. Rest & Close', index: 7 },
 ];
 
 export const PhaseTimeline: React.FC<PhaseTimelineProps> = ({
@@ -25,15 +25,28 @@ export const PhaseTimeline: React.FC<PhaseTimelineProps> = ({
 
   const modeClass = operatingMode.toLowerCase();
 
+  const getFriendlyModeName = (mode: OperatingMode): string => {
+    switch (mode) {
+      case 'Steady':
+        return 'Calm & Safe';
+      case 'Explore':
+        return 'Curious & Open';
+      case 'Build':
+        return 'Hopeful & Creative';
+      case 'Perform':
+        return 'Taking Small Steps';
+    }
+  };
+
   return (
     <div className="phase-stepper-container">
       <div className="stepper-header">
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#cbd5e1', fontSize: '0.85rem' }}>
           <Compass size={16} color="#14b8a6" />
-          <span>7-Phase ICF Journey</span>
+          <span>Our Gentle Journey</span>
         </div>
         <div className={`mode-badge ${modeClass}`}>
-          Mode: {operatingMode}
+          Space: {getFriendlyModeName(operatingMode)}
         </div>
       </div>
 

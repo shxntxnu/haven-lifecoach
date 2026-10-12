@@ -31,16 +31,16 @@ export const ModelProgressHUD: React.FC<ModelProgressHUDProps> = ({
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <Cpu size={16} color="#14b8a6" />
-          <span style={{ fontWeight: 600, color: '#f1f5f9' }}>WebGPU Engine: {modelName}</span>
+          <span style={{ fontWeight: 600, color: '#f1f5f9' }}>Local Thinking: {modelName}</span>
         </div>
 
         {progress.isLoaded ? (
           <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: '#34d399', fontSize: '0.75rem' }}>
-            <CheckCircle2 size={14} /> Ready in VRAM
+            <CheckCircle2 size={14} /> Ready in Your Safe Space
           </span>
         ) : progress.isLoading ? (
           <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: '#38bdf8', fontSize: '0.75rem' }}>
-            <RefreshCw size={14} className="spin" /> Compiling ({percent}%)
+            <RefreshCw size={14} className="spin" /> Waking Up ({percent}%)
           </span>
         ) : (
           <button
@@ -59,7 +59,7 @@ export const ModelProgressHUD: React.FC<ModelProgressHUDProps> = ({
               gap: '0.35rem',
             }}
           >
-            <Download size={13} /> Load WebGPU Weights
+            <Download size={13} /> Wake Up Local Brain
           </button>
         )}
       </div>
@@ -97,7 +97,7 @@ export const ModelProgressHUD: React.FC<ModelProgressHUDProps> = ({
               fontSize: '0.7rem',
             }}
           >
-            Switch to Instant Simulation
+            Switch to Instant Safe Chat
           </button>
         </div>
       )}

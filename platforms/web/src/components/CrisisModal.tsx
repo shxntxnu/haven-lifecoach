@@ -16,24 +16,24 @@ export const CrisisModal: React.FC<CrisisModalProps> = ({
       <div className="crisis-card">
         <div className="crisis-header">
           <AlertOctagon size={28} />
-          <h2 id="crisis-title">We Care Deeply About Your Safety</h2>
+          <h2 id="crisis-title">You Matter, and You Are Not Alone</h2>
         </div>
 
-        <p style={{ color: '#fda4af', marginBottom: '1rem', lineHeight: 1.5 }}>
-          Haven is an automated coaching tool and is strictly not equipped to handle acute distress or medical crises.
-          Your life and safety are the absolute top priority. Coaching is paused so you can connect with humans trained to support you right now.
+        <p style={{ color: '#fda4af', marginBottom: '1rem', lineHeight: 1.6 }}>
+          You matter so much, and you don't have to carry this heavy pain all by yourself. What you are feeling is real, but it is too big and important for a phone app to hold. 
+          We are pausing our chat right now because there are kind, real human beings waiting right this second who want to listen gently and help you through this moment.
         </p>
 
         {matchedCategory && (
           <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginBottom: '0.5rem' }}>
-            Flagged trigger: <strong style={{ color: '#f43f5e' }}>{matchedCategory}</strong>
+            We're pausing because: <strong style={{ color: '#f43f5e' }}>{matchedCategory}</strong>
           </div>
         )}
 
         <div className="helpline-box">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#38bdf8', fontWeight: 600, marginBottom: '0.5rem', fontSize: '0.85rem' }}>
             <PhoneCall size={16} />
-            <span>Confidential, Free 24/7 Lifelines</span>
+            <span>Kind People Waiting to Listen (Free & Confidential 24/7)</span>
           </div>
 
           {CRISIS_RESOURCES.map((r, i) => (
@@ -46,7 +46,7 @@ export const CrisisModal: React.FC<CrisisModalProps> = ({
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#94a3b8', fontSize: '0.8rem', margin: '0.8rem 0' }}>
           <Heart size={14} color="#f43f5e" />
-          <span>You do not have to carry this alone. Please reach out to one of the numbers above.</span>
+          <span>Please let someone kind hold your hand through this. Reach out to one of the numbers above.</span>
         </div>
 
         <button
@@ -60,7 +60,7 @@ export const CrisisModal: React.FC<CrisisModalProps> = ({
           }}
           onClick={onAcknowledge}
         >
-          I Understand & Will Seek Direct Support
+          I Hear You — I Will Reach Out for Help
         </button>
       </div>
     </div>

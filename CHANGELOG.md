@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.6.0] - Tone Softening & Inner-Child Accessible Sanctuary Language (2026-10-12)
+
+### Context & Architectural Motivation ("Why")
+When a person is struggling deeply in life, clinical jargon, corporate coaching terminology, and rigid administrative phrasing create alienation, intimidation, and emotional withdrawal. A person carrying pain often needs to speak and be heard in the simple, gentle, and profoundly comforting way that their childhood self would intuitively understand:
+1. **Psychological Safety for the Inner Child**: Dismantles intellectual defenses and clinical coldness by replacing clinical labels with everyday, warm, patient words.
+2. **Preserving Rigorous ICF Governance**: While the outer language is softened and de-jargonized, the core professional coaching architecture (reflection-first, single open-ended question, strict advice gate, crisis bypass) remains 100% mathematically and structurally enforced.
+3. **Compassionate UX Calibration**: Replaces mechanical terms like *"Action Shrinkage Protocol"* with compassionate, reassuring concepts like *"Taking a Gentle Little Step"*, transforming feelings of failure into empowering micro-steps.
+
+### Added & Changed ("What Was Changed")
+
+#### 1. Inner-Child System Prompt & Conversational Persona (`crates/haven-infer/src/prompt.rs`)
+- **System Persona**: Refined coaching prompt to define Haven as a gentle, patient, loving presence speaking in simple, everyday words accessible to a person's inner child.
+- **Rule 6 (No Corporate / Therapy Jargon)**: Explicitly bans phrases like *"cognitive reframing"*, *"actionable deliverables"*, *"synergistic alignment"*, or clinical diagnostic labels. Enforces warm, natural human attunement.
+- **Unit Verification**: Maintained 100% pass rate on `haven-infer` slot injection and corrective feedback tests.
+
+#### 2. Phased Coaching Dialogues & Human-Centered Micro-Copies (`platforms/web/src/engine.ts`)
+- Rewrote sequential coaching reflections and inquiries from Contract through Close to prioritize emotional grounding, kindness, and simplicity.
+- Replaced mechanical technique tags with gentle badges: `Gentle Listening`, `Checking In On You`, `Finding What Hurts`, `Listening to Your Heart`, `Dreaming of New Paths`, `Taking a Small Step`, and `Holding Onto Warmth`.
+
+#### 3. Presentation Tier De-Jargonization (`platforms/web/src/components/`, `App.tsx`)
+- **Phase Stepper (`PhaseTimeline.tsx`)**: Re-labeled stages to `1. Arrive`, `2. Check-In`, `3. The Heart`, `4. Looking In`, `5. New Paths`, `6. Little Step`, and `7. Rest & Close`. Modes renamed to `Calm & Safe`, `Curious & Open`, `Hopeful & Creative`, and `Taking Small Steps`.
+- **Gentle Action Calibration (`ActionShrinkageModal.tsx`)**: Retitled to *"Taking a Gentle Little Step"*; alert prompt rewritten with deep compassion (*"When something feels scary, our hearts want to protect us. What is an even smaller, tiny baby-step...?"*); button updated to *"I Can Do This Little Step"*.
+- **Resting & Wrapping Up (`CheckoutModal.tsx`)**: Retitled to *"Resting & Wrapping Up"*; checkout scale labeled from `1: Hard` to `5: Safe & Wonderful`; technique feedback categorized as *"Felt Gentle & Good"* vs *"Needed a Softer Way"*; sealing action updated to *"Keep Safe in My Private Sanctuary"*.
+- **Holding Crisis Modal (`CrisisModal.tsx`)**: Retitled to *"You Matter, and You Are Not Alone"*; replaced clinical verbiage with warm, human holding language and direct 24/7 lifeline support.
+- **Header & Modals (`Header.tsx`, `VaultAuthModal.tsx`, `ModelSelector.tsx`, `ModelProgressHUD.tsx`)**: Privacy badge updated to *"100% Private & Safe"*; PIN modal retitled to *"Welcome Back — Enter your 4-number secret code to open your safe space"*; model selector renamed to *"How Haven Thinks"*; progress HUD renamed to *"Wake Up Local Brain"*.
+- **Sanctuary Feed (`DialogueFeed.tsx`, `App.tsx`)**: Reflection cards titled *"I Hear You"*; gentle opening greeting and reassuring input prompt (*"Talk to me about whatever is on your mind... you are safe here"*).
+
+---
+
 ## [0.5.0] - Sprint 5: Real On-Device WebGPU Inference, Vector Memory & Decoy Vault (2026-10-10)
 
 ### Context & Architectural Motivation ("Why")

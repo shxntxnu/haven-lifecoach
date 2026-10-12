@@ -25,7 +25,7 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="brand-info">
           <h1>
             Haven
-            <span className="zk-badge">Zero-Knowledge</span>
+            <span className="zk-badge">100% Private & Safe</span>
           </h1>
         </div>
       </div>
@@ -34,7 +34,7 @@ export const Header: React.FC<HeaderProps> = ({
         <button
           className="icon-btn"
           onClick={onToggleQuietMode}
-          title={quietMode ? 'Quiet Mode Active (All badges/notifications muted)' : 'Enable Quiet Mode'}
+          title={quietMode ? 'Quiet Mode (Muted)' : 'Mute Notifications'}
           aria-label="Toggle Quiet Mode"
         >
           {quietMode ? <BellOff size={18} color="#34d399" /> : <Bell size={18} />}
@@ -43,7 +43,7 @@ export const Header: React.FC<HeaderProps> = ({
         <button
           className="icon-btn"
           onClick={onToggleDisguise}
-          title="Disguise Mode (Quickly swap to Calculator)"
+          title="Disguise as Calculator"
           aria-label="Disguise as Calculator"
         >
           <Calculator size={18} />
@@ -53,8 +53,8 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             className="icon-btn"
             onClick={onLockVault}
-            title="Lock Vault with PIN"
-            aria-label="Lock Vault"
+            title="Lock My Safe Space"
+            aria-label="Lock My Safe Space"
           >
             <Lock size={18} />
           </button>
@@ -63,8 +63,8 @@ export const Header: React.FC<HeaderProps> = ({
         <button
           className="icon-btn danger"
           onClick={onPanicWipe}
-          title="Panic Wipe (Immediate cryptographic shred & wipe)"
-          aria-label="Panic Wipe"
+          title="Quick Erase (Erase everything right now)"
+          aria-label="Quick Erase"
         >
           <AlertTriangle size={18} />
         </button>

@@ -19,10 +19,10 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ onComplete }) => {
         </div>
 
         <h2 id="checkout-title" style={{ fontFamily: 'var(--font-heading)', fontSize: '1.3rem', color: '#f8fafc', marginBottom: '0.5rem' }}>
-          Session Complete
+          Resting & Wrapping Up
         </h2>
         <p style={{ color: '#94a3b8', fontSize: '0.9rem', marginBottom: '1.25rem' }}>
-          How valuable was this conversation in moving you toward your intention?
+          How did talking things through feel for your heart today?
         </p>
 
         <div className="score-selector">
@@ -37,10 +37,14 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ onComplete }) => {
             </button>
           ))}
         </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#64748b', marginTop: '-1rem', marginBottom: '1rem', padding: '0 0.5rem' }}>
+          <span>1 = Felt Hard</span>
+          <span>5 = Felt Safe & Wonderful</span>
+        </div>
 
         <div style={{ background: 'rgba(255, 255, 255, 0.04)', borderRadius: '12px', padding: '0.85rem', margin: '1rem 0' }}>
           <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginBottom: '0.5rem' }}>
-            Did the coaching techniques feel attuned and effective?
+            Did the way I listened feel comforting and helpful?
           </div>
           <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem' }}>
             <button
@@ -54,7 +58,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ onComplete }) => {
               }}
               onClick={() => setHelpful(true)}
             >
-              <ThumbsUp size={16} /> Helpful
+              <ThumbsUp size={16} /> Felt Gentle & Good
             </button>
             <button
               className={`icon-btn ${!helpful ? 'active' : ''}`}
@@ -67,7 +71,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ onComplete }) => {
               }}
               onClick={() => setHelpful(false)}
             >
-              <ThumbsDown size={16} /> Needed Adjustment
+              <ThumbsDown size={16} /> Needed a Softer Way
             </button>
           </div>
         </div>
@@ -76,7 +80,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ onComplete }) => {
           className="close-session-btn"
           onClick={() => onComplete(selectedScore, helpful)}
         >
-          Envelope Encrypt & Save to Vault
+          Keep Safe in My Private Sanctuary
         </button>
       </div>
     </div>

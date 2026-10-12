@@ -30,7 +30,7 @@ export const DialogueFeed: React.FC<DialogueFeedProps> = ({ messages }) => {
           <div key={msg.id} className="message-bubble coach">
             {msg.reflection && (
               <div className="coach-reflection-card">
-                <div className="coach-reflection-label">Empathetic Reflection</div>
+                <div className="coach-reflection-label">I Hear You</div>
                 <p>"{msg.reflection}"</p>
               </div>
             )}
@@ -44,7 +44,7 @@ export const DialogueFeed: React.FC<DialogueFeedProps> = ({ messages }) => {
             {msg.technique && (
               <div className="coach-metadata">
                 <Zap size={13} color="#14b8a6" />
-                <span>Technique:</span>
+                <span>Gentle Care:</span>
                 <span className="technique-tag">{msg.technique}</span>
               </div>
             )}

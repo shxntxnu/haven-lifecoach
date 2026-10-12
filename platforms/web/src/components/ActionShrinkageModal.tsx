@@ -23,13 +23,13 @@ export const ActionShrinkageModal: React.FC<ActionShrinkageProps> = ({
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
         <Target size={18} color="#f59e0b" />
         <h3 style={{ fontSize: '1rem', color: '#f8fafc' }}>
-          Action Formulation & Confidence Calibration
+          Taking a Gentle Little Step
         </h3>
       </div>
 
       <div style={{ margin: '0.6rem 0' }}>
         <label style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
-          Your Concrete Action Commitment:
+          What is one small, kind thing you'd like to try doing?
         </label>
         <input
           type="text"
@@ -42,7 +42,7 @@ export const ActionShrinkageModal: React.FC<ActionShrinkageProps> = ({
             marginTop: '0.35rem',
             padding: '0.5rem 0.75rem',
           }}
-          placeholder="e.g. Schedule a 15-minute alignment call with Sarah tomorrow by 10 AM"
+          placeholder="e.g. Step outside to feel the air for 5 minutes, or write down one honest thought"
           value={actionText}
           onChange={(e) => onActionTextChange(e.target.value)}
         />
@@ -50,7 +50,7 @@ export const ActionShrinkageModal: React.FC<ActionShrinkageProps> = ({
 
       <div className="slider-container">
         <label style={{ fontSize: '0.85rem', color: '#94a3b8', minWidth: '150px' }}>
-          Readiness / Confidence:
+          How does it feel? (0 = Too hard, 10 = Easy):
         </label>
         <input
           type="range"
@@ -68,17 +68,17 @@ export const ActionShrinkageModal: React.FC<ActionShrinkageProps> = ({
         <div className="shrinkage-alert">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 600, marginBottom: '0.2rem' }}>
             <AlertCircle size={15} />
-            <span>Action Shrinkage Protocol Triggered</span>
+            <span>Let's Make This Step Smaller & Gentler</span>
           </div>
           <p>
-            Confidence is below 8/10. ICF & MI research demonstrates that commitments under 8 suffer high drop-off.
-            What is a smaller or simpler slice of this step that feels like an effortless 9 or 10?
+            That step might be a bit too heavy right now, and that is completely okay! When we feel overwhelmed or tired, we make the step tiny.
+            What is a much smaller baby-step that feels like an easy 9 or 10? Even something like taking three deep breaths, drinking a glass of water, or opening a notebook counts.
           </p>
         </div>
       ) : (
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#34d399', fontSize: '0.85rem', marginTop: '0.5rem' }}>
           <CheckCircle2 size={16} />
-          <span>High-conviction threshold met ({confidence}/10). You are primed to execute.</span>
+          <span>This feels gentle and doable ({confidence}/10). You're ready.</span>
         </div>
       )}
 
@@ -93,7 +93,7 @@ export const ActionShrinkageModal: React.FC<ActionShrinkageProps> = ({
         disabled={actionText.trim() === ''}
         onClick={onConfirmAction}
       >
-        Lock In Commitment & Advance to Session Close
+        I Can Do This Little Step
       </button>
     </div>
   );

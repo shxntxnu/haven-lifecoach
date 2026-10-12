@@ -22,35 +22,35 @@ Use this checklist to systematically verify the live system.
 
 ## 2. Verification Checklist
 
-### Protocol 1: 7-Phase ICF Coaching Journey
-*Verify that Haven maintains the rhythm and boundaries of an accredited professional coach.*
+### Protocol 1: 7-Phase Gentle Coaching Journey
+*Verify that Haven maintains the rhythm and boundaries of an accredited professional coach, while speaking in warm, simple language that feels safe to your inner child.*
 
-- [ ] **Phase 1: Contract**
-  - **Action**: Type an intention or life crossroads (e.g., *"I'm feeling burnt out in corporate finance and want to transition to climate tech"*).
-  - **Expected Outcome**: Haven acknowledges and reflects your statement first in the italicized card before asking **exactly one** open question.
-- [ ] **Phase 2: Check-In**
-  - **Action**: Respond with your current energy or emotional temperature (e.g., *"My energy is around 5/10 today"*).
-  - **Expected Outcome**: Stepper advances to `2. Check-In`. Haven validates your current state without pushing premature optimism.
-- [ ] **Phase 3: Focus**
-  - **Action**: Identify the core focal point of the session (e.g., *"The fear of walking away from a stable salary"*).
-  - **Expected Outcome**: Stepper advances to `3. Focus`. Mode is `Explore`. Haven clarifies the focal point without dictating the topic.
-- [ ] **Phase 4: Explore (Reality & Values)**
-  - **Action**: Discuss your underlying values. Test the **Advice Gate** by explicitly asking: *"What should I do?"*
-  - **Expected Outcome**: Haven **refuses to give prescriptive advice**. Instead, it gently reflects your question back to explore your inner resources.
-- [ ] **Phase 5: Options (Brainstorming)**
-  - **Action**: Move into brainstorming potential paths forward.
-  - **Expected Outcome**: Stepper advances to `5. Options` and mode shifts to `Build`. If you ask for ideas, Haven provides 2–3 alternatives and asks which resonates.
-- [ ] **Phase 6: Commit & Action Shrinkage Calibration**
-  - **Action**: Type an ambitious action step (e.g., *"Apply to 20 climate startups this week"*).
-  - **Action**: Adjust the confidence slider to **`5 / 10`**.
-  - **Expected Outcome**: The amber **Action Shrinkage Protocol** alert appears:
-    > *"Confidence is below 8/10. ICF & MI research demonstrates that commitments under 8 suffer high drop-off. What is a smaller or simpler slice of this step that feels like an effortless 9 or 10?"*
-  - **Action**: Shrink the step to *"Research 2 climate non-profits over coffee on Saturday"* and adjust slider to **`9 / 10`**.
-  - **Expected Outcome**: The button unlocks with high-conviction verification.
-- [ ] **Phase 7: Close & Cryptographic Seal**
-  - **Action**: Click *"Lock In Commitment & Advance to Session Close"*.
-  - **Action**: Select a checkout rating (1–5), give feedback on the coaching techniques, and click *"Envelope Encrypt & Save to Vault"*.
-  - **Expected Outcome**: Session seals with Argon2id + AES-256-GCM envelope encryption into your local vault.
+- [ ] **Phase 1: Arrive (Opening the Space)**
+  - **Action**: Type an intention or what feels heavy in life right now (e.g., *"I'm feeling so tired and overwhelmed by expectations and I don't know what I want anymore"*).
+  - **Expected Outcome**: Haven acknowledges and reflects your feeling first in the *"I Hear You"* card before asking **exactly one** gentle, open question.
+- [ ] **Phase 2: Check-In (How You Feel Inside)**
+  - **Action**: Respond with how your heart or energy feels (e.g., *"My energy is around 4/10 today"*).
+  - **Expected Outcome**: Stepper advances to `2. Check-In`. Operating mode is `Calm & Safe`. Haven validates how you feel with kindness without pushing toxic positivity.
+- [ ] **Phase 3: The Heart (What Matters Most)**
+  - **Action**: Share what you want to focus on (e.g., *"Finding out what actually makes me happy instead of pleasing others"*).
+  - **Expected Outcome**: Stepper advances to `3. The Heart`. Mode is `Curious & Open`. Haven listens and clarifies what matters most to you without taking over.
+- [ ] **Phase 4: Looking In (Finding What's True For You)**
+  - **Action**: Discuss your feelings and values. Test the **Advice Gate** by explicitly asking: *"What should I do? Tell me the answer."*
+  - **Expected Outcome**: Haven **gently declines to tell you what to do**. Instead, it gently reflects your question back so you can discover your own inner truth: *"I'm right here with you. What does your heart tell you when you ask yourself that?"*
+- [ ] **Phase 5: New Paths (Dreaming of What's Possible)**
+  - **Action**: Move into exploring gentle possibilities.
+  - **Expected Outcome**: Stepper advances to `5. New Paths` and mode shifts to `Hopeful & Creative`. If you ask for ideas, Haven shares 2–3 gentle ideas and asks what feels light or right.
+- [ ] **Phase 6: Little Step (Taking a Gentle Little Step)**
+  - **Action**: Type a big, scary goal (e.g., *"Clean my entire house and write 50 pages of my book today"*).
+  - **Action**: Adjust the confidence slider to **`4 / 10`**.
+  - **Expected Outcome**: The gentle amber **"Taking a Gentle Little Step"** prompt appears:
+    > *"This feels a little big or heavy right now (below 8/10), and that's okay! When something feels scary, our hearts want to protect us. What is an even smaller, tiny baby-step that feels so simple you know you can do it (an 8, 9, or 10)?"*
+  - **Action**: Shrink the step to *"Put away one cup and write 2 sentences in my notebook"* and adjust slider to **`9 / 10`**.
+  - **Expected Outcome**: The button unlocks with high confidence: *"I Can Do This Little Step"*.
+- [ ] **Phase 7: Rest & Close (Resting & Wrapping Up)**
+  - **Action**: Click *"I Can Do This Little Step"*.
+  - **Action**: Select a feeling rating (1 = Hard, 5 = Safe & Wonderful), choose how the care felt (*"Felt Gentle & Good"* vs *"Needed a Softer Way"*), and click *"Keep Safe in My Private Sanctuary"*.
+  - **Expected Outcome**: Session is securely sealed with Argon2id + AES-256-GCM envelope encryption into your local vault.
 
 ---
 

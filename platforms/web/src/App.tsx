@@ -50,9 +50,9 @@ export const App: React.FC = () => {
     {
       id: 'init-1',
       sender: 'coach',
-      reflection: 'Welcome to Haven. You are in an air-gapped, zero-knowledge sanctuary running strictly on your local device.',
-      inquiry: 'What intention or challenge would you like to dedicate our conversation to today?',
-      technique: 'Goal Clarification (GROW)',
+      reflection: 'Hi there. You are completely safe here in your private sanctuary. Take a slow, gentle breath.',
+      inquiry: "What's on your mind or resting on your heart today?",
+      technique: 'Gentle Welcome',
       timestamp: Date.now(),
     },
   ]);
@@ -118,14 +118,14 @@ export const App: React.FC = () => {
         {
           id: coachTurnId,
           sender: 'coach',
-          reflection: 'Attuning to your words in on-device WebGPU VRAM...',
+          reflection: 'Listening quietly to your words in your safe space...',
           inquiry: '',
-          technique: 'Llama-3.2-3B Neural Inference (128k)',
+          technique: 'Gentle Thinking (128k)',
           timestamp: Date.now(),
         },
       ]);
 
-      const systemPrompt = `You are Haven, an air-gapped ICF-compliant coaching partner. Phase: ${currentPhase}, Mode: ${effectiveMode}. Output a reflective response acknowledging the client first, followed by exactly ONE open question. Avoid unsolicited advice.`;
+      const systemPrompt = `You are Haven, a kind, gentle companion who speaks like a loving friend to the user's inner child. Phase: ${currentPhase}, Mode: ${effectiveMode}. Use very simple, warm, everyday words that a child could easily understand. Never use corporate jargon, big fancy words, or therapy speak. Start by softly reflecting back what they felt, then ask ONE simple, gentle question to help them breathe and look inside. Never tell them what to do.`;
 
       try {
         const turn = await webllm.generateCoachingTurn(systemPrompt, userText);
@@ -150,7 +150,7 @@ export const App: React.FC = () => {
                   ...m,
                   reflection: fallback.reflection,
                   inquiry: fallback.inquiry,
-                  technique: `${fallback.technique} (Simulation Fallback)`,
+                  technique: `${fallback.technique} (Gentle Safe Fallback)`,
                 }
               : m
           )
@@ -190,15 +190,15 @@ export const App: React.FC = () => {
       {
         id: `action-${Date.now()}`,
         sender: 'user',
-        text: `Action Commitment (${actionConfidence}/10 Confidence): ${actionPlan}`,
+        text: `My Little Step (${actionConfidence}/10 Ready): ${actionPlan}`,
         timestamp: Date.now(),
       },
       {
         id: `coach-close-${Date.now()}`,
         sender: 'coach',
-        reflection: `I acknowledge and celebrate your commitment to: "${actionPlan}".`,
-        inquiry: 'As we bring this session to completion, what is the single most valuable insight you are taking away?',
-        technique: 'Appreciative Reflection',
+        reflection: `I'm holding this sweet step with you: "${actionPlan}".`,
+        inquiry: 'As we get ready to rest, what is one kind thing you are taking away with you today?',
+        technique: 'Holding What Matters',
         timestamp: Date.now(),
       },
     ]);
@@ -215,9 +215,9 @@ export const App: React.FC = () => {
       {
         id: `closed-${Date.now()}`,
         sender: 'coach',
-        reflection: `Session sealed. Checkout Score: ${score}/5. Technique feedback logged: ${helpful ? 'Positive reinforcement' : 'Exploration prior adjusted'}.`,
-        inquiry: 'Your session has been sealed with Argon2id + AES-256-GCM envelope encryption into your local vault. Be gentle with yourself today.',
-        technique: 'Zero-Knowledge Cryptographic Seal',
+        reflection: `Your words are sealed and safe. You rated our chat ${score}/5. Feedback noted: ${helpful ? 'Felt gentle & good' : 'Will be even softer next time'}.`,
+        inquiry: 'Your chat is locked safely inside your private sanctuary on your device. Be gentle with yourself today.',
+        technique: 'Safe & Sound',
         timestamp: Date.now(),
       },
     ]);
@@ -234,9 +234,9 @@ export const App: React.FC = () => {
       {
         id: 'init-new',
         sender: 'coach',
-        reflection: 'Welcome to a new Haven session.',
-        inquiry: 'What would you like to explore or focus on in our session today?',
-        technique: 'Goal Clarification (GROW)',
+        reflection: 'Welcome back to your safe space.',
+        inquiry: "What feels most important to talk about today?",
+        technique: 'Gentle Welcome',
         timestamp: Date.now(),
       },
     ]);
@@ -285,12 +285,12 @@ export const App: React.FC = () => {
 
       {panicWiped ? (
         <div className="action-confidence-panel" style={{ textAlign: 'center', borderColor: '#f43f5e' }}>
-          <h2 style={{ color: '#f43f5e', marginBottom: '0.5rem' }}>Sanctuary Wiped</h2>
+          <h2 style={{ color: '#f43f5e', marginBottom: '0.5rem' }}>Your Space is Fresh & Clean</h2>
           <p style={{ color: '#cbd5e1', fontSize: '0.9rem', marginBottom: '1rem' }}>
-            All ephemeral session memories and cryptographic keys have been destroyed in &lt;1000ms.
+            Everything we talked about has been completely wiped away. You are safe.
           </p>
           <button className="send-btn" style={{ margin: '0 auto' }} onClick={handleResetSession}>
-            <RotateCcw size={16} /> Reinitialize Fresh Session
+            <RotateCcw size={16} /> Start a Fresh Chat
           </button>
         </div>
       ) : (
@@ -314,8 +314,8 @@ export const App: React.FC = () => {
                 className="chat-input"
                 placeholder={
                   currentPhase === 'Contract'
-                    ? 'State your topic or intention for today...'
-                    : 'Share your perspective freely...'
+                    ? "Tell me what's on your heart, take all the time you need..."
+                    : "Whatever you want to say is okay here..."
                 }
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
@@ -342,7 +342,7 @@ export const App: React.FC = () => {
                 style={{ margin: '0 auto', padding: '0.6rem 1.2rem', gap: '0.5rem', color: '#14b8a6' }}
                 onClick={handleResetSession}
               >
-                <RotateCcw size={16} /> Begin New Coaching Session
+                <RotateCcw size={16} /> Start a New Gentle Chat
               </button>
             </div>
           )}

@@ -129,14 +129,14 @@ graph TD
 ### 3.1 `haven-core`: Session Governance & Safety Guardian
 
 #### 1. 7-Phase Deterministic State Machine ([`state_machine.rs`](file:///d:/Documents/_MyStuff/Projects/haven-lifecoach/crates/haven-core/src/state_machine.rs))
-Small on-device language models (1B–8B parameters) hallucinate, jump to conclusions, or give premature advice if left unconstrained. Haven enforces the coaching discipline via a deterministic Rust state machine:
-* **Phase 1: Contract**: Establishes the purpose and scope of the conversation (*"What would make our time today well spent?"*).
-* **Phase 2: Check-In**: Evaluates emotional temperature and energy. If distress is detected, mode automatically clamps to `Steady`.
-* **Phase 3: Focus**: The client selects the single core agenda item (*"Of everything alive for you, what matters most right now?"*). Haven never dictates the topic.
-* **Phase 4: Explore (Reality & Values)**: Deepens self-awareness using Motivational Interviewing (OARS). The **Advice Gate is locked**—Haven cannot offer solutions or opinions.
-* **Phase 5: Options (Brainstorming)**: Shifts into possibilities. If the client explicitly invites input, Haven presents 2–3 balanced alternatives and asks which resonates.
-* **Phase 6: Commit (Will & Action Calibration)**: The client sizes an action step and rates their confidence (0–10). If confidence is $<8/10$, the **Action Shrinkage Protocol** forces the step to be shrunk until confidence reaches $\ge 8$.
-* **Phase 7: Close**: Consolidates learning, captures a 1–5 checkout score, and seals the session with envelope encryption.
+Small on-device language models (1B–8B parameters) hallucinate, jump to conclusions, or give premature advice if left unconstrained. Haven enforces coaching discipline via a deterministic Rust state machine, presented in warm, childhood-accessible language:
+* **Phase 1: Contract (`1. Arrive`)**: Opens a safe, unhurried space without corporate jargon (*"I'm so glad you're here. What feels heaviest or most on your mind today?"*).
+* **Phase 2: Check-In (`2. Check-In`)**: Checks how your heart and body feel inside (`Calm & Safe` mode). If distress is detected, mode automatically clamps to `Steady` to prioritize grounding.
+* **Phase 3: Focus (`3. The Heart`)**: The client points to what matters most right now (*"Of everything you're carrying, what does your heart want us to look at together?"*). Haven never imposes an agenda.
+* **Phase 4: Explore (`4. Looking In`)**: Deepens self-awareness using Motivational Interviewing (OARS). The **Advice Gate is locked**—Haven never prescribes solutions, helping you trust your own inner wisdom.
+* **Phase 5: Options (`5. New Paths`)**: Shifts into gentle possibilities (`Hopeful & Creative`). If invited, Haven shares 2–3 gentle ideas and asks what feels light or right.
+* **Phase 6: Commit (`6. Little Step`)**: The client sizes a tiny baby step and rates confidence (0–10). If confidence is $<8/10$, the **Gentle Action Shrinkage Protocol** helps break it into an effortless micro-step where they feel safe and capable.
+* **Phase 7: Close (`7. Rest & Close`)**: Celebrates the courage to show up, captures a gentle 1–5 checkout score, and seals the session with envelope encryption.
 
 #### 2. Dual-Tier Safety Guardian ([`guardian.rs`](file:///d:/Documents/_MyStuff/Projects/haven-lifecoach/crates/haven-core/src/guardian.rs))
 Operates as a bidirectional firewall:
@@ -184,6 +184,8 @@ Operates as a bidirectional firewall:
 
 #### 1. Prompt Assembler & Slot Injection ([`prompt.rs`](file:///d:/Documents/_MyStuff/Projects/haven-lifecoach/crates/haven-infer/src/prompt.rs))
 * Gathers context slots: active phase, mode, sampled technique, contract, focus agenda, retrieved episodic reflections, and client profile.
+* **Inner-Child Conversational Persona**: Instructs the model to speak with the simple, warm, everyday gentleness that a struggling person's childhood self could comfortably grasp.
+* **No Corporate / Therapy Jargon (Rule 6)**: Strictly bans clinical phrasing (*"cognitive reframing"*, *"diagnostic trajectory"*) and corporate buzzwords (*"actionable deliverables"*, *"synergistic alignment"*). Enforces patient, loving presence.
 * Enforces strict ICF non-prescriptive rules, reflection-first sequencing, and strict JSON output grammar.
 * Injects corrective instruction feedback if post-audit detects rule violations.
 
@@ -201,7 +203,13 @@ Operates as a bidirectional firewall:
 * Obsidian/slate dark theme (`#080c14`, `#0d1524`, `#152238`) with calming teal/sage accents (`#14b8a6`, `#10b981`).
 * Glassmorphic cards, fluid typography stack (Outfit & Inter), and micro-animations.
 
-#### 2. Local Model Selection & Zero Context Loss ([`ModelSelector.tsx`](file:///d:/Documents/_MyStuff/Projects/haven-lifecoach/platforms/web/src/components/ModelSelector.tsx))
+#### 2. Gentle, Child-Accessible Sanctuary Tone
+* **Compassionate Dialogue Headers**: Reflection card displays *"I Hear You"*; technique tags renamed to nurturing badges (e.g., *Gentle Listening*, *Listening to Your Heart*, *Taking a Small Step*).
+* **Gentle Action Shrinkage**: Micro-step calibration modal titled *"Taking a Gentle Little Step"*; loving prompt when $<8/10$ ensures people struggling never feel inadequate; unlocks with *"I Can Do This Little Step"*.
+* **Resting & Wrapping Up**: Checkout modal retitled *"Resting & Wrapping Up"*; comforting rating scale (1 = Hard, 5 = Safe & Wonderful); feedback options (*"Felt Gentle & Good"* / *"Needed a Softer Way"*); sealed with *"Keep Safe in My Private Sanctuary"*.
+* **Holding Crisis Modal**: Retitled *"You Matter, and You Are Not Alone"*; communicates human holding, safety, and accessible 24/7 care without clinical intimidation.
+
+#### 3. Local Model Selection & Zero Context Loss ([`ModelSelector.tsx`](file:///d:/Documents/_MyStuff/Projects/haven-lifecoach/platforms/web/src/components/ModelSelector.tsx))
 * **Primary Recommended Model**: **`Llama-3.2-3B-Instruct` (128,000-Token Context Window)**.
   * *Why*: Older local models truncate past conversations after 2k–4k tokens. The 128k context window ensures that longitudinal coaching context (past goals, commitments, themes) is **never lost**.
 * **Lightweight Alternative**: `Llama-3.2-1B-Instruct` (128k context, ~850 MB VRAM).

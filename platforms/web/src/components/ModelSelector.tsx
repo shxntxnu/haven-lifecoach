@@ -17,18 +17,25 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
     <section className="model-selector-bar" aria-label="Local Model Selection">
       <div className="model-selector-left">
         <Cpu size={16} color="#14b8a6" />
-        <span>Local Execution:</span>
+        <span>How Haven Thinks:</span>
         <select
           id="model-selector-dropdown"
           className="model-dropdown-select"
           value={selectedModelId}
           onChange={(e) => onSelectModel(e.target.value)}
         >
-          {AVAILABLE_MODELS.map((model) => (
-            <option key={model.id} value={model.id}>
-              {model.name} — {model.contextWindow} {model.recommended ? '★ (Recommended: Zero Context Loss)' : ''}
-            </option>
-          ))}
+          <option value="llama-3.2-3b-128k">
+            Llama-3.2-3B — Remembers All Your Chats ★ (Recommended)
+          </option>
+          <option value="llama-3.2-1b-128k">
+            Llama-3.2-1B — Light & Quick
+          </option>
+          <option value="phi-3.5-mini-128k">
+            Phi-3.5-mini — Deep Thinker
+          </option>
+          <option value="simulated-airgap">
+            Instant Offline — Always Ready (No Download)
+          </option>
         </select>
       </div>
       <div className="model-pill" title={current.description}>

@@ -47,10 +47,10 @@ export const VaultAuthModal: React.FC<VaultAuthModalProps> = ({
         </div>
 
         <h2 id="vault-auth-title" style={{ fontFamily: 'var(--font-heading)', fontSize: '1.3rem', color: '#f8fafc', marginBottom: '0.35rem' }}>
-          Sanctuary Vault Lock
+          Welcome Back
         </h2>
         <p style={{ color: '#94a3b8', fontSize: '0.85rem', marginBottom: '1.25rem' }}>
-          Enter your 4-digit security PIN to unseal your encrypted session.
+          Enter your 4-number secret code to open your safe space.
         </p>
 
         <form onSubmit={handleSubmit}>
@@ -87,14 +87,14 @@ export const VaultAuthModal: React.FC<VaultAuthModalProps> = ({
             className="send-btn"
             style={{ width: '100%', justifyContent: 'center', marginBottom: '1rem' }}
           >
-            <Lock size={16} /> Unseal Vault
+            <Lock size={16} /> Open My Safe Space
           </button>
         </form>
 
         <div style={{ borderTop: '1px solid rgba(255, 255, 255, 0.08)', paddingTop: '0.85rem', fontSize: '0.75rem', color: '#64748b' }}>
           <div style={{ marginBottom: '0.5rem', color: '#94a3b8' }}>
             <KeyRound size={12} style={{ display: 'inline', marginRight: 4, verticalAlign: -1 }} />
-            Plausible Deniability Stealth Pins:
+            Safety Codes (Plausible Deniability):
           </div>
           <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
             <button
@@ -112,7 +112,7 @@ export const VaultAuthModal: React.FC<VaultAuthModalProps> = ({
                 fontSize: '0.75rem',
               }}
             >
-              Master PIN (1234)
+              My Secret Code (1234)
             </button>
             <button
               onClick={() => {
@@ -129,7 +129,7 @@ export const VaultAuthModal: React.FC<VaultAuthModalProps> = ({
                 fontSize: '0.75rem',
               }}
             >
-              Decoy PIN (0000)
+              Decoy Notes (0000)
             </button>
           </div>
         </div>

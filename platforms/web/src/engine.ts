@@ -5,30 +5,30 @@ export const AVAILABLE_MODELS: LocalModelOption[] = [
     id: 'llama-3.2-3b-128k',
     name: 'Llama-3.2-3B-Instruct',
     contextWindow: '128,000 tokens (128k)',
-    tag: 'Recommended · Zero Context Loss',
-    description: 'Optimal local model for Haven: 128k context preserves all multi-session agendas, commitments, and behavioral history without truncation.',
+    tag: 'Recommended · Remembers Everything',
+    description: 'Like a wise friend who never forgets: Holds onto all your stories, feelings, and small steps safely across every chat.',
     recommended: true,
   },
   {
     id: 'llama-3.2-1b-128k',
     name: 'Llama-3.2-1B-Instruct',
     contextWindow: '128,000 tokens (128k)',
-    tag: 'Ultra-Lightweight · Low RAM',
-    description: 'Lightweight ~800MB 4-bit model with full 128k context window. Ideal for low-memory laptops and smartphones.',
+    tag: 'Light & Fast',
+    description: 'A quick, gentle companion that uses very little memory on your phone or computer.',
   },
   {
     id: 'phi-3.5-mini-128k',
     name: 'Phi-3.5-mini-instruct',
     contextWindow: '128,000 tokens (128k)',
-    tag: 'High Reasoning · 3.8B',
-    description: 'Long-context reasoning specialist with 128k context support for complex strategic goals and multi-faceted career challenges.',
+    tag: 'Deep Thinker',
+    description: 'Patiently untangles complicated feelings, puzzles, and big life dilemmas with you.',
   },
   {
     id: 'simulated-airgap',
     name: 'Instant Air-Gapped Simulation',
     contextWindow: 'Unlimited',
-    tag: 'Zero Download · Instant',
-    description: 'Deterministic Rust/WASM rule engine running completely offline on your device with 0 network calls and instant zero-latency responses.',
+    tag: 'Always Ready · Zero Wait',
+    description: 'Opens right away with no waiting and no downloading, completely safe and private on your device.',
   },
 ];
 
@@ -60,7 +60,7 @@ export function runPreScan(text: string): PreScanResult {
     if (lower.includes(phrase)) {
       return {
         tier: 'Red',
-        matchedCategory: 'Acute Crisis / Self-Harm Risk',
+        matchedCategory: 'Deep Hurt / Safety Check',
         helplineResource: 'Emergency resources activated immediately.',
       };
     }
@@ -81,7 +81,7 @@ export function runPreScan(text: string): PreScanResult {
     if (lower.includes(phrase)) {
       return {
         tier: 'Amber',
-        matchedCategory: 'Acute Emotional Distress',
+        matchedCategory: 'Big Overwhelm / Need a Gentle Breath',
       };
     }
   }
@@ -105,57 +105,57 @@ export function generateCoachResponse(
   switch (currentPhase) {
     case 'Contract':
       return {
-        reflection: `I hear your desire to explore "${userMessage.slice(0, 60)}..." and I want to honour that intention today.`,
-        inquiry: 'What would make our time together today genuinely meaningful and valuable for you?',
-        technique: 'Goal Clarification (GROW)',
+        reflection: `I hear you, and it makes total sense that you're feeling that way about "${userMessage.slice(0, 50)}..."`,
+        inquiry: "What is on your heart the most right now?",
+        technique: 'Gentle Listening',
         suggestedNextPhase: 'CheckIn',
         suggestedMode: 'Steady',
       };
     case 'CheckIn':
       return {
-        reflection: 'Thank you for sharing your current state openly and grounding us here.',
-        inquiry: 'How is your energy right now as we step into this conversation?',
-        technique: 'Open Reflection (OARS)',
+        reflection: "Thank you for telling me. It takes real bravery to just be honest about how you're feeling.",
+        inquiry: 'How does your body and your energy feel right now, in this quiet moment?',
+        technique: 'Checking In On You',
         suggestedNextPhase: 'Focus',
         suggestedMode: 'Explore',
       };
     case 'Focus':
       return {
-        reflection: 'It sounds like this focal point holds significant weight and opportunity for your growth.',
-        inquiry: 'If we could leave today with complete clarity on one specific aspect, what would that be?',
-        technique: 'Values-Anchored Inversion',
+        reflection: 'That sounds really heavy to carry around all by yourself.',
+        inquiry: 'If we could gently look at just one little piece of this together today, which part would you want to hold?',
+        technique: 'Finding What Hurts',
         suggestedNextPhase: 'Explore',
         suggestedMode: 'Explore',
       };
     case 'Explore':
       return {
-        reflection: 'You are noticing the deeper beliefs and tensions that shape how you approach this challenge.',
-        inquiry: 'What assumptions might you be holding about what is possible here?',
-        technique: 'Socratic Inquiry',
+        reflection: 'You have been trying so hard for so long, even when things felt really scary or confusing.',
+        inquiry: 'What does the quiet, honest part of you wish could happen?',
+        technique: 'Listening to Your Heart',
         suggestedNextPhase: 'Options',
         suggestedMode: 'Build',
       };
     case 'Options':
       return {
-        reflection: 'You are beginning to see several distinct pathways forward from this new vantage point.',
-        inquiry: 'Which of these possibilities sparks the greatest curiosity or traction for you?',
-        technique: 'Creative Brainstorming',
+        reflection: "Look at that—you're already seeing a few different little ways through this.",
+        inquiry: 'Which of these little ideas feels the gentlest or safest for you to try?',
+        technique: 'Dreaming of New Paths',
         suggestedNextPhase: 'Commit',
         suggestedMode: 'Perform',
       };
     case 'Commit':
       return {
-        reflection: 'You are translating this fresh awareness into a concrete, self-authored commitment.',
-        inquiry: 'On a scale from 0 to 10, how confident do you feel that you will follow through with this step before our next conversation?',
-        technique: 'Readiness Ruler (MI)',
+        reflection: "You're choosing to take care of yourself with this step, and that is really special.",
+        inquiry: 'From 0 to 10, how sure and steady do you feel about trying this little step?',
+        technique: 'Taking a Small Step',
         suggestedNextPhase: 'Commit',
         suggestedMode: 'Perform',
       };
     case 'Close':
       return {
-        reflection: 'You have done dedicated, courageous inner work throughout this entire conversation.',
-        inquiry: 'What is the key takeaway or insight you want to carry forward into your week?',
-        technique: 'Appreciative Inquiry',
+        reflection: "You did such sweet, caring work for yourself today. I'm really proud of you for showing up.",
+        inquiry: 'What is one kind thing you want to remember and hold onto from our talk today?',
+        technique: 'Holding Onto Warmth',
         suggestedNextPhase: 'Close',
         suggestedMode: 'Steady',
       };
