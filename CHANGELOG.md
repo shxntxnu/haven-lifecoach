@@ -33,6 +33,12 @@ When a person is struggling deeply in life, clinical jargon, corporate coaching 
 - **Holding Crisis Modal (`CrisisModal.tsx`)**: Retitled to *"You Matter, and You Are Not Alone"*; replaced clinical verbiage with warm, human holding language and direct 24/7 lifeline support.
 - **Header & Modals (`Header.tsx`, `VaultAuthModal.tsx`, `ModelSelector.tsx`, `ModelProgressHUD.tsx`)**: Privacy badge updated to *"100% Private & Safe"*; PIN modal retitled to *"Welcome Back — Enter your 4-number secret code to open your safe space"*; model selector renamed to *"How Haven Thinks"*; progress HUD renamed to *"Wake Up Local Brain"*.
 - **Sanctuary Feed (`DialogueFeed.tsx`, `App.tsx`)**: Reflection cards titled *"I Hear You"*; gentle opening greeting and reassuring input prompt (*"Talk to me about whatever is on your mind... you are safe here"*).
+- **Conversational Continuity & Step Guidance (`ActionShrinkageModal.tsx`, `engine.ts`, `App.tsx`)**:
+  - Eliminated the abrupt "conversational wall" where the chat dock was hidden upon entering the Commit phase. The chat input dock remains active and accessible so users never feel locked out or cut off.
+  - Connected the coach's inquiry directly to the commitment card: *"Take a look at the little step box below. Which of these gentle ideas feels the safest or easiest for you to try?"*
+  - Automatically pre-populates the action card if the user types their idea into the chat dock, or lets them type in either location.
+  - Eliminated premature shrinkage warnings: if no action is typed, the card displays gentle, welcoming step-by-step instructions rather than warning that a non-existent step is "too heavy".
+  - Defaulted the initial confidence slider to `9/10` to promote self-efficacy, and made the confirmation button dynamically guide the user (`"✍️ Type your little step in the box above to continue"` $\rightarrow$ `"🌿 Make step smaller or adjust slider to 8+"` $\rightarrow$ `"✨ I Can Do This Little Step — Finish Chat →"`).
 
 ---
 

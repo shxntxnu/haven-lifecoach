@@ -138,15 +138,15 @@ export function generateCoachResponse(
     case 'Options':
       return {
         reflection: "Look at that—you're already seeing a few different little ways through this.",
-        inquiry: 'Which of these little ideas feels the gentlest or safest for you to try?',
+        inquiry: 'Take a look at the little step box below. Which of these gentle ideas feels the safest or easiest for you to try?',
         technique: 'Dreaming of New Paths',
         suggestedNextPhase: 'Commit',
         suggestedMode: 'Perform',
       };
     case 'Commit':
       return {
-        reflection: "You're choosing to take care of yourself with this step, and that is really special.",
-        inquiry: 'From 0 to 10, how sure and steady do you feel about trying this little step?',
+        reflection: `"${userMessage.length > 50 ? userMessage.slice(0, 50) + '...' : userMessage}" sounds so gentle and caring.`,
+        inquiry: 'I have set that as your little step below. Make sure the slider feels like an easy 8, 9, or 10, then tap the green button to finish our chat.',
         technique: 'Taking a Small Step',
         suggestedNextPhase: 'Commit',
         suggestedMode: 'Perform',

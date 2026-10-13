@@ -36,7 +36,7 @@ export const App: React.FC = () => {
   const [currentPhase, setCurrentPhase] = useState<SessionPhase>('Contract');
   const [operatingMode, setOperatingMode] = useState<OperatingMode>('Steady');
   const [inputText, setInputText] = useState<string>('');
-  const [actionConfidence, setActionConfidence] = useState<number>(7);
+  const [actionConfidence, setActionConfidence] = useState<number>(9);
   const [actionPlan, setActionPlan] = useState<string>('');
   const [showCheckout, setShowCheckout] = useState<boolean>(false);
 
@@ -108,6 +108,26 @@ export const App: React.FC = () => {
 
     setMessages((prev) => [...prev, newMsg]);
 
+    // If currently in Commit phase, typing in chat updates the action step directly
+    if (currentPhase === 'Commit') {
+      setActionPlan(userText);
+      setTimeout(() => {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: `coach-${Date.now()}`,
+            sender: 'coach',
+            reflection: `"${userText}" sounds so peaceful and doable.`,
+            inquiry:
+              'I have placed that into your little step card below. When you feel ready, make sure the slider feels like an easy 8, 9, or 10, then tap the green button to finish our chat.',
+            technique: 'Taking a Small Step',
+            timestamp: Date.now(),
+          },
+        ]);
+      }, 300);
+      return;
+    }
+
     // Check if WebGPU engine is initialized for active model
     const isWebGPUActive = selectedModelId !== 'simulated-airgap' && webllm.isReady(selectedModelId);
 
@@ -175,6 +195,9 @@ export const App: React.FC = () => {
 
         if (coachResp.suggestedNextPhase) {
           setCurrentPhase(coachResp.suggestedNextPhase);
+          if (coachResp.suggestedNextPhase === 'Commit' && !actionPlan) {
+            setActionPlan(userText);
+          }
         }
         if (coachResp.suggestedMode) {
           setOperatingMode(coachResp.suggestedMode);
@@ -227,7 +250,7 @@ export const App: React.FC = () => {
   const handleResetSession = () => {
     setCurrentPhase('Contract');
     setOperatingMode('Steady');
-    setActionConfidence(7);
+    setActionConfidence(9);
     setActionPlan('');
     setPanicWiped(false);
     setMessages([
@@ -307,14 +330,16 @@ export const App: React.FC = () => {
             />
           )}
 
-          {currentPhase !== 'Commit' && currentPhase !== 'Close' && (
-            <div className="input-dock">
+          {currentPhase !== 'Close' && (
+            <div className="input-dock" style={{ marginTop: currentPhase === 'Commit' ? '0.85rem' : 0 }}>
               <input
                 type="text"
                 className="chat-input"
                 placeholder={
                   currentPhase === 'Contract'
                     ? "Tell me what's on your heart, take all the time you need..."
+                    : currentPhase === 'Commit'
+                    ? "Type your little step or reply to Haven here..."
                     : "Whatever you want to say is okay here..."
                 }
                 value={inputText}
