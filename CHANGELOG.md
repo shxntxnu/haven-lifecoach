@@ -39,6 +39,12 @@ When a person is struggling deeply in life, clinical jargon, corporate coaching 
   - Automatically pre-populates the action card if the user types their idea into the chat dock, or lets them type in either location.
   - Eliminated premature shrinkage warnings: if no action is typed, the card displays gentle, welcoming step-by-step instructions rather than warning that a non-existent step is "too heavy".
   - Defaulted the initial confidence slider to `9/10` to promote self-efficacy, and made the confirmation button dynamically guide the user (`"✍️ Type your little step in the box above to continue"` $\rightarrow$ `"🌿 Make step smaller or adjust slider to 8+"` $\rightarrow$ `"✨ I Can Do This Little Step — Finish Chat →"`).
+- **Welcome & Sanctuary Greeting Page (`WelcomePage.tsx`, `App.tsx`, `index.css`)**:
+  - Implemented a time-aware greeting view that welcomes the user every time they log in or start a session.
+  - Dynamically calculates the time of day to display personalized greetings: *"Good morning"* (5:00–11:59), *"Good afternoon"* (12:00–16:59), or *"Good evening"* (17:00–4:59), accompanied by glowing time-period icons (`Sunrise`, `Sun`, `Sunset`, `Moon`).
+  - Added a prominent, glowing action button labeled **`"Ready to check in"`** with an inviting micro-animation.
+  - Integrated smooth, fluid CSS entry and exit transitions (`.welcome-screen.fade-out` $\rightarrow$ `.sanctuary-view` fade-in) connecting the greeting seamlessly into the coaching workspace.
+  - Preserved stealth header access (calculator disguise, lock, mute, and panic-wipe) directly on the welcome screen for zero-compromise privacy.
 
 ---
 

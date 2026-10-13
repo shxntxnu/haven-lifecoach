@@ -719,6 +719,190 @@ html, body {
   box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
 }
 
+/* Welcome / Greeting Screen */
+.welcome-screen {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.welcome-screen.fade-out {
+  opacity: 0;
+  transform: translateY(-12px) scale(0.98);
+  pointer-events: none;
+}
+
+.welcome-hero-card {
+  position: relative;
+  max-width: 580px;
+  width: 100%;
+  margin: 3.5rem auto 2rem;
+  padding: 3rem 2.25rem;
+  background: var(--bg-card);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg), 0 0 40px rgba(20, 184, 166, 0.1);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+  animation: welcomeFadeIn 0.5s ease-out;
+}
+
+@keyframes welcomeFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.welcome-glow-orb {
+  position: absolute;
+  top: -80px;
+  width: 260px;
+  height: 260px;
+  border-radius: 50%;
+  filter: blur(60px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.welcome-icon-circle {
+  position: relative;
+  z-index: 1;
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.welcome-badge {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--accent-teal-soft);
+  color: var(--accent-teal);
+  border: 1px solid rgba(20, 184, 166, 0.3);
+  padding: 0.3rem 0.85rem;
+  border-radius: var(--radius-full);
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin-bottom: 0.85rem;
+}
+
+.welcome-heading {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-heading);
+  font-size: 2.6rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.75rem;
+  line-height: 1.2;
+}
+
+.welcome-subtext {
+  position: relative;
+  z-index: 1;
+  font-size: 1.02rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  max-width: 480px;
+  margin-bottom: 1.85rem;
+}
+
+.welcome-features {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 2.25rem;
+}
+
+.welcome-feature-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 0.4rem 0.85rem;
+  border-radius: var(--radius-md);
+  font-size: 0.82rem;
+  color: #cbd5e1;
+}
+
+.welcome-checkin-btn {
+  position: relative;
+  z-index: 1;
+  background: linear-gradient(135deg, #14b8a6, #0d9488);
+  color: #042f2e;
+  border: none;
+  border-radius: var(--radius-full);
+  padding: 0.95rem 2.4rem;
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  box-shadow: 0 4px 20px rgba(20, 184, 166, 0.4), 0 0 40px rgba(20, 184, 166, 0.2);
+  transition: all 0.25s ease;
+}
+
+.welcome-checkin-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(20, 184, 166, 0.55), 0 0 50px rgba(20, 184, 166, 0.3);
+  background: linear-gradient(135deg, #2dd4bf, #14b8a6);
+}
+
+.welcome-checkin-btn:hover .arrow-icon {
+  transform: translateX(4px);
+}
+
+.welcome-checkin-btn .arrow-icon {
+  transition: transform 0.25s ease;
+}
+
+.welcome-checkin-btn:active {
+  transform: translateY(0);
+}
+
+/* Smooth fade in for sanctuary once checked in */
+.sanctuary-view {
+  animation: sanctuaryFadeIn 0.4s ease-out;
+}
+
+@keyframes sanctuaryFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Responsiveness */
 @media (max-width: 640px) {
   .haven-app {
@@ -732,4 +916,21 @@ html, body {
   .step-label {
     display: none;
   }
+
+  .welcome-hero-card {
+    margin: 1.5rem 0.5rem;
+    padding: 2rem 1.25rem;
+  }
+
+  .welcome-heading {
+    font-size: 2rem;
+  }
+
+  .welcome-checkin-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 0.85rem 1.5rem;
+    font-size: 1rem;
+  }
 }
+

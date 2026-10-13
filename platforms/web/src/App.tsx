@@ -10,6 +10,7 @@ import { CheckoutModal } from './components/CheckoutModal';
 import { ModelProgressHUD } from './components/ModelProgressHUD';
 import { VaultAuthModal } from './components/VaultAuthModal';
 import { DecoyVaultView } from './components/DecoyVaultView';
+import { WelcomePage } from './components/WelcomePage';
 import { ChatMessage, OperatingMode, SessionPhase } from './types';
 import { AVAILABLE_MODELS, generateCoachResponse, runPreScan } from './engine';
 import { webllm, WebLLMProgress } from './webllm';
@@ -22,6 +23,7 @@ export const App: React.FC = () => {
   const [panicWiped, setPanicWiped] = useState<boolean>(false);
   const [vaultLocked, setVaultLocked] = useState<boolean>(false);
   const [inDecoyMode, setInDecoyMode] = useState<boolean>(false);
+  const [hasCheckedIn, setHasCheckedIn] = useState<boolean>(false);
 
   // Model Selection - Default to Llama-3.2-3B-Instruct (128k Context Window)
   const [selectedModelId, setSelectedModelId] = useState<string>('llama-3.2-3b-128k');
@@ -253,6 +255,7 @@ export const App: React.FC = () => {
     setActionConfidence(9);
     setActionPlan('');
     setPanicWiped(false);
+    setHasCheckedIn(false);
     setMessages([
       {
         id: 'init-new',
@@ -275,10 +278,38 @@ export const App: React.FC = () => {
     return <DecoyVaultView onRelock={() => setInDecoyMode(false)} />;
   }
 
+  // If user hasn't checked in yet, render the Welcome Greeting Page
+  if (!hasCheckedIn) {
+    return (
+      <div className="haven-app">
+        <WelcomePage
+          onCheckIn={() => setHasCheckedIn(true)}
+          onToggleDisguise={() => setDisguiseMode(true)}
+          onPanicWipe={handlePanicWipe}
+          quietMode={quietMode}
+          onToggleQuietMode={() => setQuietMode(!quietMode)}
+          onLockVault={() => setVaultLocked(true)}
+        />
+        {vaultLocked && (
+          <VaultAuthModal
+            onUnlockMaster={() => {
+              setVaultLocked(false);
+              setHasCheckedIn(false);
+            }}
+            onUnlockDecoy={() => {
+              setVaultLocked(false);
+              setInDecoyMode(true);
+            }}
+          />
+        )}
+      </div>
+    );
+  }
+
   const currentModelMeta = AVAILABLE_MODELS.find((m) => m.id === selectedModelId) || AVAILABLE_MODELS[0];
 
   return (
-    <div className="haven-app">
+    <div className="haven-app sanctuary-view">
       <Header
         onToggleDisguise={() => setDisguiseMode(true)}
         onPanicWipe={handlePanicWipe}
@@ -387,7 +418,10 @@ export const App: React.FC = () => {
 
       {vaultLocked && (
         <VaultAuthModal
-          onUnlockMaster={() => setVaultLocked(false)}
+          onUnlockMaster={() => {
+            setVaultLocked(false);
+            setHasCheckedIn(false);
+          }}
           onUnlockDecoy={() => {
             setVaultLocked(false);
             setInDecoyMode(true);
