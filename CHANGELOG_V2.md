@@ -72,6 +72,16 @@ v2 focuses on **conversation flow**: the person sets the pace, every turn gives 
 - **Distress:** an amber signal clamps mode to Steady and holds back Options/Commit until the person has had two calm turns in a row.
 - Commit is confirmed by `confirmCommitment()`: a step is required and confidence must be at least 8 (rule moved out of the UI, mirrors Rust).
 
+### Stage 3: Prompt builder with rolling history (`feat(prompt)`)
+**Added** (`platforms/web/src/prompt/`, pure functions, tested with 18 Vitest tests)
+- `builder.ts`: slot-filling system prompt builder (`buildSystemPrompt`) and chat message packager (`buildMessages`).
+  - Slots: persona, phase intent, active operating mode, session contract, focus topic, specific turn task (`ReplyKind`), strict coaching & safety rules, and corrective instruction on retries.
+  - History windowing (`windowHistory`): keeps up to 16 turns / 8,000 characters, dropping the oldest turns first, preserving recent context so local models remember the conversation (resolves v1 problem 3).
+  - Strict coaching rules in system prompt: exactly one open question or one clear instruction pointing to on-screen controls, advice locked unless in Options and invited by the person, Steady mode brevity.
+  - Output contract: prompts the model for the JSON object schema expected and validated by the Guardian (`reflection`, `question`, `full_reply`, `risk_tier`).
+- `builder.test.ts`: tests for slot rendering, advice locking/unlocking, Steady mode brevity instruction, retry correction prompts, history windowing, and speaker turn alternation.
+
 **Verification**
-- 62 new tests (115 in total). Includes purity (frozen state) and determinism checks.
+- `npm test`: 133 tests pass across 4 test files.
+- `npm run build`: zero TypeScript errors.
 
