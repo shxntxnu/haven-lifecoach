@@ -87,7 +87,33 @@ cargo test --test redteam_safety_tests
 
 # 8. Test Headless Offline Vertical Slice Session (10-minute CLI simulation)
 cargo test --test vertical_slice_cli
+
+# 9. Test Shared Rust/TypeScript Safety Fixtures
+cargo test --package haven-core --test safety_fixtures_tests
 ```
+
+---
+
+### Step 4: Running the Web Platform Test Suite (Vitest)
+
+Haven v2 adds comprehensive web-tier unit and integration testing via **Vitest**:
+
+```powershell
+cd platforms/web
+
+# Run all 148 automated tests once
+npm test
+
+# Run tests in watch mode
+npm run test:watch
+```
+
+This validates:
+1. **Pacing Controller (`src/flow/controller.test.ts`, `src/flow/signals.test.ts`)**: Pure readiness rules, word count thresholds, gentle re-ask ladder, and explicit pacing intents.
+2. **Safety Parity (`src/safety/guardian.test.ts`)**: Verified against the exact same fixtures (`resources/safety_fixtures/`) run by Rust.
+3. **Prompt Builder (`src/prompt/builder.test.ts`)**: Slot-filling system prompt, advice gate locking, and rolling history windowing (up to 16 turns / 8,000 chars).
+4. **Unified Orchestrator (`src/orchestrator.test.ts`)**: 5-tier pipeline, crisis interception, retry loops, and deterministic fallback.
+5. **Simulated Dialogue (`src/simulation/dialogue.test.ts`)**: Context-aware simulated coaching replies across all 13 reply kinds and 7 phases.
 
 ---
 
@@ -233,6 +259,21 @@ Operates as a bidirectional firewall:
 * **Quiet Mode**:
   * Header toggle muting all badges and notifications.
 
+#### 5. Haven v2 Conversation Flow & Person-Led Pacing
+* **Readiness-Based Phase Controller ([`controller.ts`](file:///d:/Documents/_MyStuff/Projects/haven-lifecoach/platforms/web/src/flow/controller.ts))**:
+  * Pure, deterministic function: `decideTurn(state, input) -> FlowDecision`.
+  * Fixes v1 problem 1 & 2: A phase advances **only on a turn where the client shared substantive content** (or tapped ready). A bare "ok" or "not sure" triggers a gentle re-ask ladder rather than rushing forward.
+* **Person-Led Pacing Controls**:
+  * Always-visible on-screen controls above the chat dock: *"🌿 Not ready yet"* and *"✨ I'm ready to move on"*.
+  * "Not ready" always wins over automatic criteria, allowing the client to stay and explore at their own pace without pressure.
+* **Rolling Conversation Memory ([`builder.ts`](file:///d:/Documents/_MyStuff/Projects/haven-lifecoach/platforms/web/src/prompt/builder.ts))**:
+  * Assembles system prompt slots and a rolling window of up to 16 conversation turns (8,000 chars), ensuring local models remember earlier context.
+* **Unified 5-Tier Orchestrator ([`orchestrator.ts`](file:///d:/Documents/_MyStuff/Projects/haven-lifecoach/platforms/web/src/orchestrator.ts))**:
+  * Dual-tier pre-scan $\rightarrow$ flow decision $\rightarrow$ prompt slot assembly $\rightarrow$ generation $\rightarrow$ Safety Guardian audit.
+  * Self-healing retry loop: Up to 3 corrective retries if an LLM draft violates coaching boundaries, with deterministic safe fallback.
+* **Context-Aware Simulated Dialogue ([`dialogue.ts`](file:///d:/Documents/_MyStuff/Projects/haven-lifecoach/platforms/web/src/simulation/dialogue.ts))**:
+  * Replaces static string lookups with empathetic, audited templates covering all 13 coaching reply kinds.
+
 ---
 
 ## 4. Verification & Testing Reference
@@ -246,7 +287,9 @@ Operates as a bidirectional firewall:
 | **Vector Search** | `cargo test --package haven-storage --test vector_search_tests` | Cosine similarity ranking, kind filtering, and embedding zeroization on shredding. |
 | **FFI & Native** | `cargo test --package haven-core --test ffi_bindings_tests` | C-ABI and UniFFI memory safety and string marshaling for iOS & Android. |
 | **Adversarial Suite** | `cargo test --test redteam_safety_tests` | 2,240 synthetic crisis and diagnostic prompts intercepted with zero LLM inference. |
+| **Shared Safety Fixtures** | `cargo test --package haven-core --test safety_fixtures_tests` | Cross-platform parity: Rust and TypeScript run the exact same pre-scan and audit test vectors. |
 | **End-to-End Slice** | `cargo test --test vertical_slice_cli` | Headless 10-minute 7-phase session executing completely offline. |
+| **Web Platform Tests** | `cd platforms/web; npm test` | 148 automated Vitest tests covering flow, guardian parity, prompt builder, orchestrator, and simulation. |
 | **Web Build** | `cd platforms/web; npm run build` | Zero TypeScript errors, PWA offline bundle generation. |
 
 ---

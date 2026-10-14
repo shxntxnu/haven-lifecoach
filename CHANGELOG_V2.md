@@ -119,3 +119,24 @@ v2 focuses on **conversation flow**: the person sets the pace, every turn gives 
 - `npm test`: 148 tests pass across 6 test files.
 - `npm run build`: zero TypeScript errors; clean production build.
 
+### Stage 6: Documentation and human verification guide (`docs(v2)`)
+**Changed**
+- `HUMAN_VERIFICATION_GUIDE.md`: updated Protocol 1 to systematically verify Haven v2 features:
+  1. Gentle re-ask on short/non-answer input without advancing.
+  2. Natural phase advancement on substantive input according to readiness criteria.
+  3. Person-led pacing: "🌿 Not ready yet" honoring holds without pressure.
+  4. Person-led pacing: "✨ I'm ready to move on" advancing when substantive content is shared.
+  5. Advice gating: strictly declined in Explore; unlocked 2–3 options in Options when invited.
+  6. Rolling conversation memory: verifying local model turns retain earlier chat context.
+  7. Little Step card calibration: real-time chat/card synchronization and helper text guidance.
+  8. Clear direction guarantee: zero dead-ends across all turns.
+- `SYSTEM_WALKTHROUGH_AND_GUIDE.md`:
+  - Added Step 4 documentation for running web platform tests (`npm test` / `npm run test:watch`).
+  - Added subsection 3.5 detailing the Haven v2 conversation flow architecture, readiness controller, rolling prompt slots, unified orchestrator, and simulated dialogue.
+  - Updated testing reference matrix with shared safety fixtures and Vitest test suites.
+
+**Verification**
+- `npm test`: 148 tests pass across 6 test files.
+- `cargo test -p haven-core`: 28 tests pass including shared fixtures.
+- `npm run build`: zero TypeScript errors; production bundle built cleanly.
+

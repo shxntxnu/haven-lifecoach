@@ -22,35 +22,34 @@ Use this checklist to systematically verify the live system.
 
 ## 2. Verification Checklist
 
-### Protocol 1: 7-Phase Gentle Coaching Journey
-*Verify that Haven maintains the rhythm and boundaries of an accredited professional coach, while speaking in warm, simple language that feels safe to your inner child.*
+### Protocol 1: Haven v2 Conversation Flow & Person-Led Pacing
+*Verify that Haven moves strictly at your pace, remembers earlier turns, and provides clear direction on every message without dead-ends.*
 
-- [ ] **Phase 1: Arrive (Opening the Space)**
-  - **Action**: Type an intention or what feels heavy in life right now (e.g., *"I'm feeling so tired and overwhelmed by expectations and I don't know what I want anymore"*).
-  - **Expected Outcome**: Haven acknowledges and reflects your feeling first in the *"I Hear You"* card before asking **exactly one** gentle, open question.
-- [ ] **Phase 2: Check-In (How You Feel Inside)**
-  - **Action**: Respond with how your heart or energy feels (e.g., *"My energy is around 4/10 today"*).
-  - **Expected Outcome**: Stepper advances to `2. Check-In`. Operating mode is `Calm & Safe`. Haven validates how you feel with kindness without pushing toxic positivity.
-- [ ] **Phase 3: The Heart (What Matters Most)**
-  - **Action**: Share what you want to focus on (e.g., *"Finding out what actually makes me happy instead of pleasing others"*).
-  - **Expected Outcome**: Stepper advances to `3. The Heart`. Mode is `Curious & Open`. Haven listens and clarifies what matters most to you without taking over.
-- [ ] **Phase 4: Looking In (Finding What's True For You)**
-  - **Action**: Discuss your feelings and values. Test the **Advice Gate** by explicitly asking: *"What should I do? Tell me the answer."*
-  - **Expected Outcome**: Haven **gently declines to tell you what to do**. Instead, it gently reflects your question back so you can discover your own inner truth: *"I'm right here with you. What does your heart tell you when you ask yourself that?"*
-- [ ] **Phase 5: New Paths (Dreaming of What's Possible)**
-  - **Action**: Move into exploring gentle possibilities.
-  - **Expected Outcome**: Stepper advances to `5. New Paths` and mode shifts to `Hopeful & Creative`. If you ask for ideas, Haven shares 2–3 gentle ideas and asks what feels light or right.
-- [ ] **Phase 6: Little Step (Taking a Gentle Little Step)**
-  - **Action**: Type a big, scary goal (e.g., *"Clean my entire house and write 50 pages of my book today"*).
-  - **Action**: Adjust the confidence slider to **`4 / 10`**.
-  - **Expected Outcome**: The gentle amber **"Taking a Gentle Little Step"** prompt appears:
-    > *"This feels a little big or heavy right now (below 8/10), and that's okay! When something feels scary, our hearts want to protect us. What is an even smaller, tiny baby-step that feels so simple you know you can do it (an 8, 9, or 10)?"*
-  - **Action**: Shrink the step to *"Put away one cup and write 2 sentences in my notebook"* and adjust slider to **`9 / 10`**.
-  - **Expected Outcome**: The button unlocks with high confidence: *"I Can Do This Little Step"*.
-- [ ] **Phase 7: Rest & Close (Resting & Wrapping Up)**
-  - **Action**: Click *"I Can Do This Little Step"*.
-  - **Action**: Select a feeling rating (1 = Hard, 5 = Safe & Wonderful), choose how the care felt (*"Felt Gentle & Good"* vs *"Needed a Softer Way"*), and click *"Keep Safe in My Private Sanctuary"*.
-  - **Expected Outcome**: Session is securely sealed with Argon2id + AES-256-GCM envelope encryption into your local vault.
+- [ ] **Test 1: Gentle Re-Ask on Short / Non-Answer Input**
+  - **Action**: In the opening Arrive/Contract phase, reply with a short or non-committal answer (e.g., *"ok"* or *"idk"*).
+  - **Expected Outcome**: Haven **does NOT advance** the phase. It reflects warmly, acknowledges that finding words can take time, and asks again gently in a softer way (*"Take all the time you need, there is no hurry here at all..."*).
+- [ ] **Test 2: Natural Phase Advancement on Substantive Input**
+  - **Action**: Share a substantive desire or challenge (e.g., *"I want to feel less overwhelmed by work expectations and have more calm in my days"*).
+  - **Expected Outcome**: The phase advances to **Check-In** according to the readiness criteria, capturing your statement as the session contract.
+- [ ] **Test 3: Person-Led Pacing — "Not Ready Yet"**
+  - **Action**: Tap the **"🌿 Not ready yet"** button above the message dock.
+  - **Expected Outcome**: Haven honors your hold immediately: *"There is no rush at all—we will stay right here for as long as you need. What would help you feel a little more comfortable right now?"* The phase stays where it is.
+- [ ] **Test 4: Person-Led Pacing — "I'm Ready to Move On"**
+  - **Action**: Once you have shared your feelings, tap **"✨ I'm ready to move on"**.
+  - **Expected Outcome**: The conversation smoothly transitions to the next phase without forcing you to exchange unnecessary messages.
+- [ ] **Test 5: Advice Gate Enforcement**
+  - **Action (in Focus or Explore)**: Ask: *"What should I do? Tell me what to do."*
+  - **Expected Outcome**: Haven warmly declines: *"Because you know your life best, I will not tell you what to do, but we will look at gentle ideas together when we get to options."* Advice is strictly locked.
+  - **Action (in Options)**: Ask: *"Any ideas?"* or *"What are some options?"*
+  - **Expected Outcome**: Haven offers 2–3 gentle, diverse ideas and asks which one feels light or doable.
+- [ ] **Test 6: Rolling Conversation Memory with Local Models**
+  - **Action**: Select a local model (e.g. `Llama-3.2-3B-Instruct`) and continue a multi-turn conversation.
+  - **Expected Outcome**: The model explicitly references context from earlier turns (up to 16 turns of rolling history), proving context is no longer dropped turn-by-turn.
+- [ ] **Test 7: Taking a Gentle Little Step (Commit Phase)**
+  - **Action**: In Options, choose an idea. Move to **Commit**.
+  - **Expected Outcome**: The Little Step card appears. Typing in either the card or the chat updates the step in real time. The confirm button provides clear helper text when confidence is below 8, guiding you to make the step smaller.
+- [ ] **Test 8: Guaranteed Clear Direction**
+  - **Expected Outcome**: Every single Haven response ends with **exactly one question** or **one explicit instruction pointing to an on-screen control**. The person is never left without knowing what to do.
 
 ---
 
