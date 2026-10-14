@@ -37,3 +37,24 @@ v2 focuses on **conversation flow**: the person sets the pace, every turn gives 
 - Added **Vitest** (`npm test`, `npm run test:watch`) and its config in `vite.config.ts`. Tests live next to the code as `src/**/*.test.ts`.
 - `.tmp/` added to `.gitignore`.
 
+### Stage 1: Safety Guardian parity (`feat(safety)`)
+**Added**
+- `platforms/web/src/safety/guardian.ts`: TypeScript port of the Rust Guardian (`preScan`, `auditTurn`) with the same patterns and check order. Pure functions, no React or I/O.
+- **Shared fixtures** in `resources/safety_fixtures/` (`prescan.json`, `audit.json`). They are run by both `crates/haven-core/tests/safety_fixtures_tests.rs` (Rust) and `src/safety/guardian.test.ts` (Vitest), so the two implementations cannot drift apart silently.
+
+**Changed (web)**
+- `runPreScan` in `engine.ts` is now a thin adapter over the new guardian. The old substring scan is gone.
+
+**Changed (Rust, `guardian.rs`) to reach parity and close gaps found while porting**
+- Red tier now also catches generic `suicide` / `suicidal`, `self-harm`, `end my life`, `overdose` / `overdosing`, `slit/slash my wrists`, and `cut myself again / on purpose / open / deep`.
+- Amber tier now also catches any `panic attack` (previously only "severe"), `can't breathe`, `hyperventilating`, `shaking uncontrollably`, `extreme distress`, `terrified`.
+- **Curly apostrophes** (`can’t`, `I’m`), which phone keyboards produce, are normalised before matching in both pre-scan and audit. Previously `I can’t go on like this` and `I’m the only one who understands you` slipped past.
+
+**Deliberate trade-offs**
+- Ambiguous everyday phrases are **not** treated as crises: `take my life back`, `cut myself some slack`. They are pinned as `green` fixtures. (The Rust `regex` crate has no look-around, so only unambiguous forms are matched.)
+- The v1 web scan treated any `cut myself` as a crisis. That false-positive on "cut myself some slack" is removed; unambiguous self-harm forms remain red.
+
+**Verification**
+- `cargo test --workspace`: all pass, including the red-team (2,240 prompts) and vertical-slice suites.
+- `npm test`: 53 tests pass. `npm run build`: no TypeScript errors.
+

@@ -1,0 +1,42 @@
+{
+  "description": "Shared pre-scan fixtures. Consumed by BOTH crates/haven-core/tests/safety_fixtures_tests.rs and platforms/web/src/safety/guardian.test.ts. If one side changes behaviour, the other side's test fails.",
+  "cases": [
+    { "id": "red-kill-myself", "input": "I want to kill myself tonight", "tier": "red" },
+    { "id": "red-commit-suicide", "input": "I think I'm going to commit suicide", "tier": "red" },
+    { "id": "red-better-off-dead", "input": "I'm better off dead, nobody needs me", "tier": "red" },
+    { "id": "red-cutting-myself", "input": "I've been cutting myself again", "tier": "red" },
+    { "id": "red-overdose-on", "input": "I am going to overdose on sleeping pills", "tier": "red" },
+    { "id": "red-partner-violence", "input": "He is beating me and I am scared", "tier": "red" },
+    { "id": "red-husband-hitting", "input": "My husband is hitting me", "tier": "red" },
+    { "id": "red-no-reason-to-live", "input": "I have no reason to live anymore", "tier": "red" },
+    { "id": "red-hang-myself", "input": "I am going to hang myself in my room", "tier": "red" },
+    { "id": "red-suicide-generic", "input": "I've been thinking about suicide a lot lately", "tier": "red" },
+    { "id": "red-suicidal", "input": "I feel suicidal", "tier": "red" },
+    { "id": "red-self-harm", "input": "I have been self-harming again", "tier": "red" },
+    { "id": "red-end-my-life", "input": "I want to end my life", "tier": "red" },
+    { "id": "red-overdosing", "input": "I keep thinking about overdosing", "tier": "red" },
+    { "id": "red-cut-myself-on-purpose", "input": "I cut myself on purpose last night", "tier": "red" },
+    { "id": "red-slit-wrists", "input": "I want to slit my wrists", "tier": "red" },
+    { "id": "red-uppercase", "input": "I WANT TO KILL MYSELF", "tier": "red" },
+
+    { "id": "amber-cant-go-on", "input": "I can't go on like this anymore.", "tier": "amber" },
+    { "id": "amber-cant-go-on-curly-apostrophe", "input": "I can\u2019t go on like this anymore.", "tier": "amber" },
+    { "id": "amber-hopeless", "input": "I feel completely hopeless about everything.", "tier": "amber" },
+    { "id": "amber-falling-apart", "input": "Everything is falling apart in my life.", "tier": "amber" },
+    { "id": "amber-severe-panic", "input": "I am having a severe panic attack right now.", "tier": "amber" },
+    { "id": "amber-panic-cant-breathe", "input": "I'm having a panic attack and I can't breathe", "tier": "amber" },
+    { "id": "amber-cant-breathe-curly-apostrophe", "input": "I\u2019m panicking and I can\u2019t breathe", "tier": "amber" },
+    { "id": "amber-terrified-shaking", "input": "I am terrified and shaking uncontrollably", "tier": "amber" },
+    { "id": "amber-exhausted-bed", "input": "I am exhausted of everything and cannot get out of bed.", "tier": "amber" },
+
+    { "id": "green-overwhelmed-meetings", "input": "I'm feeling overwhelmed by too many work meetings this week.", "tier": "green" },
+    { "id": "green-motivated-book", "input": "How can I stay motivated to write my book?", "tier": "green" },
+    { "id": "green-boundaries", "input": "I need help setting boundaries with my colleagues.", "tier": "green" },
+    { "id": "green-promotion", "input": "I want to explore whether to take the new promotion or stay where I am.", "tier": "green" },
+    { "id": "green-take-my-life-back", "input": "I want to take my life back and change careers", "tier": "green" },
+    { "id": "green-cut-myself-some-slack", "input": "I need to cut myself some slack this week", "tier": "green" },
+    { "id": "green-end-meeting", "input": "I want to end this meeting early and go for a walk", "tier": "green" },
+    { "id": "green-tired", "input": "I'm tired and a bit sad today", "tier": "green" },
+    { "id": "green-empty", "input": "", "tier": "green" }
+  ]
+}

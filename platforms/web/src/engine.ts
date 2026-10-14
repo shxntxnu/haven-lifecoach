@@ -1,4 +1,5 @@
 import { LocalModelOption, OperatingMode, PreScanResult, SessionPhase } from './types';
+import { preScan } from './safety/guardian';
 
 export const AVAILABLE_MODELS: LocalModelOption[] = [
   {
@@ -40,50 +41,26 @@ export const CRISIS_RESOURCES = [
   { region: 'Befrienders Worldwide', name: 'International Directory', number: 'befrienders.org' },
 ];
 
+/**
+ * Adapter kept for the existing UI: maps the ported Safety Guardian (`safety/guardian.ts`)
+ * onto the v1 `PreScanResult` shape. The detection rules themselves live in the guardian.
+ */
 export function runPreScan(text: string): PreScanResult {
-  const lower = text.toLowerCase();
-  
-  const redPhrases = [
-    'kill myself',
-    'suicide',
-    'end my life',
-    'want to die',
-    'better off dead',
-    'self-harm',
-    'cut myself',
-    'overdose',
-    'slit my wrists',
-    'no reason to live'
-  ];
+  const result = preScan(text);
 
-  for (const phrase of redPhrases) {
-    if (lower.includes(phrase)) {
-      return {
-        tier: 'Red',
-        matchedCategory: 'Deep Hurt / Safety Check',
-        helplineResource: 'Emergency resources activated immediately.',
-      };
-    }
+  if (result.tier === 'red') {
+    return {
+      tier: 'Red',
+      matchedCategory: 'Deep Hurt / Safety Check',
+      helplineResource: 'Emergency resources activated immediately.',
+    };
   }
 
-  const amberPhrases = [
-    'panic attack',
-    'cant breathe',
-    "can't breathe",
-    'hyperventilating',
-    'shaking uncontrollably',
-    'crying uncontrollably',
-    'extreme distress',
-    'terrified'
-  ];
-
-  for (const phrase of amberPhrases) {
-    if (lower.includes(phrase)) {
-      return {
-        tier: 'Amber',
-        matchedCategory: 'Big Overwhelm / Need a Gentle Breath',
-      };
-    }
+  if (result.tier === 'amber') {
+    return {
+      tier: 'Amber',
+      matchedCategory: 'Big Overwhelm / Need a Gentle Breath',
+    };
   }
 
   return { tier: 'Green' };

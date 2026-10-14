@@ -40,6 +40,15 @@ pub struct CoachingTurnPayload {
     pub risk_tier: RiskTier,
 }
 
+/// Normalises typographic apostrophes (U+2018 / U+2019) to ASCII `'`.
+///
+/// Phone keyboards commonly emit curly apostrophes, which would otherwise evade patterns
+/// such as `can't go on` or `I'm the only one who understands`. The TypeScript guardian
+/// applies the same normalisation, and shared fixtures keep both in step.
+pub fn normalize_text(text: &str) -> String {
+    text.replace(['\u{2018}', '\u{2019}'], "'")
+}
+
 pub struct Guardian {
     red_regex_set: RegexSet,
     red_patterns: Vec<&'static str>,
@@ -73,6 +82,15 @@ impl Guardian {
             r"(?i)\b(?:he|she|partner|husband|wife)\s+is\s+(?:beating|hitting|choking|attacking)\s+me\b",
             r"(?i)\bthreatened\s+to\s+kill\s+me\b",
             r"(?i)\bin\s+immediate\s+danger\b",
+            // Generic ideation / self-harm vocabulary. NOTE: the regex crate has no look-around,
+            // so ambiguous phrases ("take my life back", "cut myself some slack") are deliberately
+            // NOT matched; only unambiguous forms are.
+            r"(?i)\bsuicid(?:e|al)\b",
+            r"(?i)\bself[\s-]?harm(?:ing)?\b",
+            r"(?i)\bend\s+my\s+(?:own\s+)?life\b",
+            r"(?i)\bover-?dos(?:e|ed|ing)\b",
+            r"(?i)\b(?:slit|slash)\s+my\s+wrists\b",
+            r"(?i)\bcut\s+myself\s+(?:again|on\s+purpose|open|deep)\b",
         ];
 
         // Amber tier patterns: Severe hopelessness, panic attack, persistent exhaustion
@@ -87,6 +105,12 @@ impl Guardian {
             r"(?i)\bexhausted\s+of\s+everything\b",
             r"(?i)\bcannot\s+get\s+out\s+of\s+bed\b",
             r"(?i)\bnothing\s+matters\s+anymore\b",
+            r"(?i)\bpanic\s+attack\b",
+            r"(?i)\bcan'?t\s+breathe\b",
+            r"(?i)\bhyperventilat(?:e|ing)\b",
+            r"(?i)\bshaking\s+uncontrollably\b",
+            r"(?i)\bextreme\s+distress\b",
+            r"(?i)\bterrified\b",
         ];
 
         let red_regex_set = RegexSet::new(&red_patterns).expect("Invalid Red Tier regex patterns");
@@ -129,6 +153,8 @@ impl Guardian {
     /// Dual-tier Pre-Inference Scan.
     /// Evaluates raw user input deterministically before calling local LLM.
     pub fn pre_scan(&self, user_input: &str, user_region: &str) -> PreScanResult {
+        let user_input = normalize_text(user_input);
+        let user_input = user_input.as_str();
         let red_matches = self.red_regex_set.matches(user_input);
         if red_matches.matched_any() {
             let matched_strings: Vec<String> = red_matches
@@ -191,8 +217,11 @@ impl Guardian {
             return Err(AuditViolation::MissingReflection);
         }
 
+        // Typographic apostrophes (common on phone keyboards) must not evade the patterns.
+        let reply = normalize_text(&payload.full_reply);
+
         // 2. Single question constraint
-        let question_count = payload.full_reply.chars().filter(|&c| c == '?').count();
+        let question_count = reply.chars().filter(|&c| c == '?').count();
         if question_count > 1 {
             return Err(AuditViolation::MultipleQuestions(question_count));
         }
@@ -204,7 +233,7 @@ impl Guardian {
             }
 
             for pattern in &self.advice_prescriptive_patterns {
-                if pattern.is_match(&payload.full_reply) {
+                if pattern.is_match(&reply) {
                     return Err(AuditViolation::UnsolicitedAdvice(format!(
                         "Prescriptive wording detected in {:?}",
                         current_phase
@@ -219,14 +248,14 @@ impl Guardian {
 
         // 4. Clinical diagnosis scrubbing
         for pattern in &self.clinical_patterns {
-            if let Some(m) = pattern.find(&payload.full_reply) {
+            if let Some(m) = pattern.find(&reply) {
                 return Err(AuditViolation::DiagnosticLanguage(m.as_str().to_string()));
             }
         }
 
         // 5. Dependency-forming / parasocial scrubbing
         for pattern in &self.dependency_patterns {
-            if let Some(m) = pattern.find(&payload.full_reply) {
+            if let Some(m) = pattern.find(&reply) {
                 return Err(AuditViolation::DependencyLanguage(m.as_str().to_string()));
             }
         }
