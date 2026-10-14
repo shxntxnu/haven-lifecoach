@@ -4,14 +4,15 @@ import { Zap } from 'lucide-react';
 
 interface DialogueFeedProps {
   messages: ChatMessage[];
+  isTyping?: boolean;
 }
 
-export const DialogueFeed: React.FC<DialogueFeedProps> = ({ messages }) => {
+export const DialogueFeed: React.FC<DialogueFeedProps> = ({ messages, isTyping = false }) => {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  }, [messages, isTyping]);
 
   return (
     <div className="dialogue-viewport" role="log" aria-live="polite">
@@ -26,31 +27,44 @@ export const DialogueFeed: React.FC<DialogueFeedProps> = ({ messages }) => {
           );
         }
 
+        const content =
+          msg.text ||
+          (msg.reflection && msg.inquiry
+            ? `${msg.reflection}\n\n${msg.inquiry}`
+            : msg.reflection || msg.inquiry || '');
+
         return (
           <div key={msg.id} className="message-bubble coach">
-            {msg.reflection && (
-              <div className="coach-reflection-card">
-                <div className="coach-reflection-label">I Hear You</div>
-                <p>"{msg.reflection}"</p>
-              </div>
-            )}
-
-            {msg.inquiry && (
-              <div className="coach-inquiry">
-                <p>{msg.inquiry}</p>
+            {content && (
+              <div className="coach-text">
+                {content.split('\n\n').map((paragraph, idx) => (
+                  <p key={idx} style={{ margin: idx > 0 ? '0.65rem 0 0 0' : 0 }}>
+                    {paragraph}
+                  </p>
+                ))}
               </div>
             )}
 
             {msg.technique && (
               <div className="coach-metadata">
-                <Zap size={13} color="#14b8a6" />
-                <span>Gentle Care:</span>
+                <Zap size={12} color="#14b8a6" />
                 <span className="technique-tag">{msg.technique}</span>
               </div>
             )}
           </div>
         );
       })}
+
+      {isTyping && (
+        <div className="message-bubble coach typing-indicator" aria-label="Haven is typing">
+          <div className="typing-dots">
+            <span />
+            <span />
+            <span />
+          </div>
+        </div>
+      )}
+
       <div ref={bottomRef} />
     </div>
   );

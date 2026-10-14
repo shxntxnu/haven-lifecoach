@@ -22,7 +22,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ onComplete }) => {
           Resting & Wrapping Up
         </h2>
         <p style={{ color: '#94a3b8', fontSize: '0.9rem', marginBottom: '1.25rem' }}>
-          How did talking things through feel for your heart today?
+          How did talking things through feel for your mind today?
         </p>
 
         <div className="score-selector">

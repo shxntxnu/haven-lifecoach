@@ -22,9 +22,47 @@ function truncate(text: string, maxLen: number): string {
   return `${clean.slice(0, maxLen)}...`;
 }
 
+function extractAttunedReflection(userMessage: string, fallback?: string): string {
+  const text = userMessage.toLowerCase();
+
+  if (/\b(?:tired|exhausted|burn(?:ed)?\s*out|drained|overwhelm(?:ed)?|too\s+much|heavy|can't\s+keep\s+up|swamped)\b/.test(text)) {
+    return 'I can hear how much energy this has been taking out of you, and how deeply tired you feel carrying so much on your shoulders.';
+  }
+  if (/\b(?:anxious|scared|worry|worried|fear|racing|nervous|panic|uneasy|dread)\b/.test(text)) {
+    return 'It sounds like your mind has been spinning without giving you a chance to catch your breath, and that can feel so exhausting.';
+  }
+  if (/\b(?:sad|crying|lonely|alone|lost|grief|hurt|heartbroken|empty)\b/.test(text)) {
+    return 'I can feel how much sadness is resting with you right now, and how heavy that feels to sit with.';
+  }
+  if (/\b(?:angry|mad|annoyed|frustrated|fight|argument|conflict|unfair|furious)\b/.test(text)) {
+    return 'It makes complete sense that you would feel frustrated and upset after dealing with that kind of tension.';
+  }
+  if (/\b(?:failure|guilt|guilty|messed\s+up|my\s+fault|hate\s+myself|not\s+good\s+enough|lazy)\b/.test(text)) {
+    return 'You are putting so much pressure on yourself right now, even though you have been trying your hardest through some really difficult days.';
+  }
+  if (/\b(?:work|job|boss|manager|deadline|career|colleague|project)\b/.test(text)) {
+    return 'Work demands can feel so relentless, and it sounds like this situation has been weighing on your mind a lot.';
+  }
+  if (/\b(?:peace|calm|quiet|rest|break|space|breathe|relief|relax)\b/.test(text)) {
+    return 'I hear how deeply you are craving some quiet breathing room and gentle relief right now.';
+  }
+
+  if (fallback) {
+    return fallback;
+  }
+
+  const clean = truncate(userMessage, 45);
+  if (clean.length > 0) {
+    return `Hearing you describe ${clean.toLowerCase()} really highlights how much this has been on your mind.`;
+  }
+
+  return 'Thank you for sharing that with me. It takes real honesty to put feelings into words.';
+}
+
 export function generateSimulatedTurn(
   decision: FlowDecision,
-  userMessage: string
+  userMessage: string,
+  previousStepReview?: string
 ): SimulatedTurn {
   const { replyPhase, replyKind, state } = decision;
 
@@ -39,9 +77,11 @@ export function generateSimulatedTurn(
         case 'Contract':
           reflection =
             userMessage.trim().length > 0
-              ? 'I hear you, and it makes complete sense that you want to talk about that.'
+              ? extractAttunedReflection(userMessage, `I hear how much "${truncate(userMessage, 40)}" has been occupying your mind.`)
               : "Welcome. I'm really glad you're here today.";
-          inquiry = 'What would make this quiet time feel most worth it for you?';
+          inquiry = previousStepReview
+            ? `By the way, were you able to try the little step you set for yourself last time: "${truncate(previousStepReview, 45)}"?`
+            : "What would make this quiet time feel most worth it for you?";
           technique = 'Gentle Listening';
           break;
         case 'CheckIn':
@@ -49,11 +89,13 @@ export function generateSimulatedTurn(
             state.contract || userMessage,
             40
           )}".`;
-          inquiry = 'How does your body and your heart feel right now, in this quiet moment?';
+          inquiry = previousStepReview
+            ? `By the way, were you able to try the little step you set for yourself last time: "${truncate(previousStepReview, 45)}"?`
+            : 'How does your body and your mind feel right now, in this quiet moment?';
           technique = 'Checking In On You';
           break;
         case 'Focus':
-          reflection = 'Thank you for being so honest about how you are feeling right now.';
+          reflection = extractAttunedReflection(userMessage, 'Thank you for being so honest about how you are feeling right now.');
           inquiry =
             'If we could gently look at just one little piece of this together today, what matters most to you?';
           technique = 'Finding What Matters';
@@ -91,25 +133,37 @@ export function generateSimulatedTurn(
     case 'deepen': {
       switch (replyPhase) {
         case 'Contract':
-          reflection = `I hear how much "${truncate(userMessage, 40)}" matters to you.`;
+          reflection = extractAttunedReflection(
+            userMessage,
+            `I hear how much "${truncate(userMessage, 40)}" has been on your mind.`
+          );
           inquiry = 'What would help you feel safe and comfortable as we talk through this today?';
           technique = 'Setting Our Space';
           break;
         case 'CheckIn':
-          reflection = `It takes real bravery to say "${truncate(userMessage, 40)}".`;
+          reflection = extractAttunedReflection(
+            userMessage,
+            `It takes real bravery to talk honestly about "${truncate(userMessage, 40)}".`
+          );
           inquiry = 'When that feeling is there, what does your body need most right now?';
           technique = 'Listening to Your Body';
           break;
         case 'Focus':
-          reflection = `I can feel the weight of "${truncate(userMessage, 40)}".`;
+          reflection = extractAttunedReflection(
+            userMessage,
+            `I can feel how much "${truncate(userMessage, 40)}" has been taking up space in your thoughts.`
+          );
           inquiry = 'What makes that feel like the most important part to focus on right now?';
           technique = 'Clarifying Focus';
           break;
         case 'Explore':
-          reflection = `You have been carrying "${truncate(
+          reflection = extractAttunedReflection(
             userMessage,
-            40
-          )}" for a while, and it makes total sense that it feels heavy.`;
+            `You have been carrying "${truncate(
+              userMessage,
+              40
+            )}" for a while, and it makes total sense that it feels heavy.`
+          );
           inquiry = 'What quiet part of you wishes things could feel a little different?';
           technique = 'Gentle Deepening';
           break;
@@ -125,7 +179,7 @@ export function generateSimulatedTurn(
           break;
         case 'Close':
           reflection = `Holding onto "${truncate(userMessage, 40)}" is such a sweet gift to yourself.`;
-          inquiry = 'How does your heart feel right now as we get ready to wrap up?';
+          inquiry = 'How does your mind and your body feel right now as we get ready to wrap up?';
           technique = 'Closing Reflections';
           break;
       }
@@ -197,7 +251,7 @@ export function generateSimulatedTurn(
     case 'closing':
       reflection =
         'You did such brave, caring work for yourself today. Thank you for sharing your time with me, and please remember to be gentle with yourself.';
-      inquiry = 'How does your heart feel as you step back into your day?';
+      inquiry = 'How does your mind feel as you step back into your day?';
       technique = 'Warm Wrap-Up';
       break;
 

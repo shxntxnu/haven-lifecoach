@@ -17,6 +17,12 @@ import { webllm, WebLLMProgress } from './webllm';
 import { createInitialFlowState, confirmCommitment, type FlowState } from './flow/controller';
 import { runTurn, createSafeFallback } from './orchestrator';
 import type { DialogueTurn } from './prompt/builder';
+import {
+  getLastStep,
+  saveLastStep,
+  markLastStepReviewed,
+  clearJourneyStorage,
+} from './storage/journeyStorage';
 import { Send, RotateCcw, Clock, ArrowRight } from 'lucide-react';
 
 export const App: React.FC = () => {
@@ -51,25 +57,102 @@ export const App: React.FC = () => {
     active: false,
   });
 
-  // Dialogue History
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      id: 'init-1',
-      sender: 'coach',
-      reflection: 'Hi there. You are completely safe here in your private sanctuary. Take a slow, gentle breath.',
-      inquiry: "What's on your mind or resting on your heart today?",
-      technique: 'Gentle Welcome',
-      timestamp: Date.now(),
-    },
-  ]);
+  // Typing Indicator for natural texting cadence (Option A)
+  const [isCoachTyping, setIsCoachTyping] = useState<boolean>(false);
+
+  // Dialogue History - contextual greeting on arrival
+  const [messages, setMessages] = useState<ChatMessage[]>(() => {
+    const lastStep = getLastStep();
+    if (lastStep && !lastStep.reviewed) {
+      return [
+        {
+          id: 'init-1',
+          sender: 'coach',
+          text: 'How are you feeling today?',
+          technique: 'Gentle Welcome',
+          timestamp: Date.now(),
+        },
+      ];
+    }
+    return [
+      {
+        id: 'init-1',
+        sender: 'coach',
+        text: "Welcome. How are you feeling today, and what's on your mind?",
+        technique: 'Gentle Welcome',
+        timestamp: Date.now(),
+      },
+    ];
+  });
 
   // Handle WebGPU Model Initialization
   const handleInitWebGPU = async () => {
     await webllm.loadModel(selectedModelId, (p) => setWebllmProgress(p));
   };
 
+  // Natural text conversation delivery (Option A: separate bubbles with typing delay)
+  const deliverCoachReply = (
+    placeholderId: string,
+    reflection: string,
+    inquiry: string,
+    technique?: string
+  ) => {
+    const hasReflection = Boolean(reflection && reflection.trim());
+    const hasInquiry = Boolean(inquiry && inquiry.trim());
+
+    if (hasReflection && hasInquiry) {
+      // 1. First bubble: reflection
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === placeholderId
+            ? {
+                id: placeholderId,
+                sender: 'coach',
+                text: reflection.trim(),
+                technique,
+                timestamp: Date.now(),
+              }
+            : m
+        )
+      );
+      // 2. Typing indicator between bubbles
+      setIsCoachTyping(true);
+      // 3. Second bubble: inquiry after natural pause
+      setTimeout(() => {
+        setIsCoachTyping(false);
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: `inq-${Date.now()}`,
+            sender: 'coach',
+            text: inquiry.trim(),
+            timestamp: Date.now(),
+          },
+        ]);
+      }, 600);
+    } else {
+      setIsCoachTyping(false);
+      const singleText = (hasReflection ? reflection : inquiry) || '';
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === placeholderId
+            ? {
+                id: placeholderId,
+                sender: 'coach',
+                text: singleText.trim(),
+                technique,
+                timestamp: Date.now(),
+              }
+            : m
+        )
+      );
+    }
+  };
+
   // Handle Panic Wipe (1000ms panic button)
   const handlePanicWipe = () => {
+    clearJourneyStorage();
+    setIsCoachTyping(false);
     // 1. Scramble & purge in-memory dialogue
     setMessages([]);
     setInputText('');
@@ -114,8 +197,7 @@ export const App: React.FC = () => {
       {
         id: coachTurnId,
         sender: 'coach',
-        reflection: 'Listening quietly to your words in your safe space...',
-        inquiry: '',
+        text: 'Listening quietly in your safe space...',
         technique: isWebGPUActive ? 'Gentle Thinking (128k)' : 'Gentle Listening',
         timestamp: Date.now(),
       },
@@ -132,6 +214,12 @@ export const App: React.FC = () => {
             : m.reflection || m.inquiry || ''),
       }));
 
+    const lastStep = getLastStep();
+    const previousStepReview =
+      currentPhase === 'Contract' && lastStep && !lastStep.reviewed
+        ? lastStep.plan
+        : undefined;
+
     try {
       const result = await runTurn({
         userMessage: userText,
@@ -141,15 +229,21 @@ export const App: React.FC = () => {
           ? (msgs, onChunk) => webllm.generateChat(msgs, onChunk)
           : undefined,
         modelId: selectedModelId,
+        previousStepReview,
       });
 
       if (result.kind === 'crisis') {
+        setIsCoachTyping(false);
         setMessages((prev) => prev.filter((m) => m.id !== coachTurnId));
         setCrisisAlert({
           active: true,
           category: result.matchedPatterns.join(', '),
         });
         return;
+      }
+
+      if (previousStepReview) {
+        markLastStepReviewed();
       }
 
       setFlowState(result.nextState);
@@ -160,17 +254,11 @@ export const App: React.FC = () => {
         setActionPlan(result.nextState.actionSeed);
       }
 
-      setMessages((prev) =>
-        prev.map((m) =>
-          m.id === coachTurnId
-            ? {
-                ...m,
-                reflection: result.reflection,
-                inquiry: result.inquiry,
-                technique: result.technique,
-              }
-            : m
-        )
+      deliverCoachReply(
+        coachTurnId,
+        result.reflection,
+        result.inquiry,
+        result.technique
       );
     } catch {
       const fallback = createSafeFallback({
@@ -183,17 +271,11 @@ export const App: React.FC = () => {
         adviceUnlocked: false,
       });
 
-      setMessages((prev) =>
-        prev.map((m) =>
-          m.id === coachTurnId
-            ? {
-                ...m,
-                reflection: fallback.reflection,
-                inquiry: fallback.inquiry,
-                technique: 'Gentle Safe Fallback',
-              }
-            : m
-        )
+      deliverCoachReply(
+        coachTurnId,
+        fallback.reflection,
+        fallback.inquiry,
+        'Gentle Safe Fallback'
       );
     }
   };
@@ -255,6 +337,7 @@ export const App: React.FC = () => {
       });
 
       if (result.kind === 'crisis') {
+        setIsCoachTyping(false);
         setMessages((prev) => prev.filter((m) => m.id !== coachTurnId));
         setCrisisAlert({
           active: true,
@@ -271,17 +354,11 @@ export const App: React.FC = () => {
         setActionPlan(result.nextState.actionSeed);
       }
 
-      setMessages((prev) =>
-        prev.map((m) =>
-          m.id === coachTurnId
-            ? {
-                ...m,
-                reflection: result.reflection,
-                inquiry: result.inquiry,
-                technique: result.technique,
-              }
-            : m
-        )
+      deliverCoachReply(
+        coachTurnId,
+        result.reflection,
+        result.inquiry,
+        result.technique
       );
     } catch {
       const fallback = createSafeFallback({
@@ -294,17 +371,11 @@ export const App: React.FC = () => {
         adviceUnlocked: false,
       });
 
-      setMessages((prev) =>
-        prev.map((m) =>
-          m.id === coachTurnId
-            ? {
-                ...m,
-                reflection: fallback.reflection,
-                inquiry: fallback.inquiry,
-                technique: 'Gentle Safe Fallback',
-              }
-            : m
-        )
+      deliverCoachReply(
+        coachTurnId,
+        fallback.reflection,
+        fallback.inquiry,
+        'Gentle Safe Fallback'
       );
     }
   };
@@ -316,23 +387,42 @@ export const App: React.FC = () => {
     setCurrentPhase(decision.state.phase);
     setOperatingMode(decision.state.mode);
 
+    // Save step to private on-device storage
+    saveLastStep(actionPlan, actionConfidence);
+
+    const actionMsgId = `action-${Date.now()}`;
+    const coachCloseId = `coach-close-${Date.now()}`;
+
     setMessages((prev) => [
       ...prev,
       {
-        id: `action-${Date.now()}`,
+        id: actionMsgId,
         sender: 'user',
         text: `My Little Step (${actionConfidence}/10 Ready): ${actionPlan}`,
         timestamp: Date.now(),
       },
       {
-        id: `coach-close-${Date.now()}`,
+        id: coachCloseId,
         sender: 'coach',
-        reflection: `I'm holding this sweet step with you: "${actionPlan}".`,
-        inquiry: 'As we get ready to rest, what is one kind thing you are taking away with you today?',
+        text: `I'm holding this sweet step with you: "${actionPlan}".`,
         technique: 'Holding What Matters',
         timestamp: Date.now(),
       },
     ]);
+
+    setIsCoachTyping(true);
+    setTimeout(() => {
+      setIsCoachTyping(false);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: `coach-close-inq-${Date.now()}`,
+          sender: 'coach',
+          text: 'As we get ready to rest, what is one kind thing you are taking away with you today?',
+          timestamp: Date.now(),
+        },
+      ]);
+    }, 600);
 
     setShowCheckout(true);
   };
@@ -340,21 +430,38 @@ export const App: React.FC = () => {
   // Final Session Checkout & Envelope Encryption
   const handleCheckoutComplete = (score: number, helpful: boolean) => {
     setShowCheckout(false);
+    const closedRefId = `closed-ref-${Date.now()}`;
+
     setMessages((prev) => [
       ...prev,
       {
-        id: `closed-${Date.now()}`,
+        id: closedRefId,
         sender: 'coach',
-        reflection: `Your words are sealed and safe. You rated our chat ${score}/5. Feedback noted: ${helpful ? 'Felt gentle & good' : 'Will be even softer next time'}.`,
-        inquiry: 'Your chat is locked safely inside your private sanctuary on your device. Be gentle with yourself today.',
+        text: `Your words are sealed and safe. You rated our chat ${score}/5. Feedback noted: ${helpful ? 'Felt gentle & good' : 'Will be even softer next time'}.`,
         technique: 'Safe & Sound',
         timestamp: Date.now(),
       },
     ]);
+
+    setIsCoachTyping(true);
+    setTimeout(() => {
+      setIsCoachTyping(false);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: `closed-inq-${Date.now()}`,
+          sender: 'coach',
+          text: 'Your chat is locked safely inside your private sanctuary on your device. Be gentle with yourself today.',
+          timestamp: Date.now(),
+        },
+      ]);
+    }, 600);
   };
 
   // Reset Session
   const handleResetSession = () => {
+    clearJourneyStorage();
+    setIsCoachTyping(false);
     setFlowState(createInitialFlowState());
     setCurrentPhase('Contract');
     setOperatingMode('Steady');
@@ -366,8 +473,7 @@ export const App: React.FC = () => {
       {
         id: 'init-new',
         sender: 'coach',
-        reflection: 'Welcome back to your safe space.',
-        inquiry: "What feels most important to talk about today?",
+        text: "Welcome. How are you feeling today, and what's on your mind?",
         technique: 'Gentle Welcome',
         timestamp: Date.now(),
       },
@@ -455,7 +561,7 @@ export const App: React.FC = () => {
         </div>
       ) : (
         <>
-          <DialogueFeed messages={messages} />
+          <DialogueFeed messages={messages} isTyping={isCoachTyping} />
 
           {currentPhase === 'Commit' && (
             <ActionShrinkageModal
@@ -497,7 +603,7 @@ export const App: React.FC = () => {
                   className="chat-input"
                   placeholder={
                     currentPhase === 'Contract'
-                      ? "Tell me what's on your heart, take all the time you need..."
+                      ? "Tell me what's on your mind, take all the time you need..."
                       : currentPhase === 'Commit'
                       ? "Type your little step or reply to Haven here..."
                       : "Whatever you want to say is okay here..."

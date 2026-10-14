@@ -140,3 +140,26 @@ v2 focuses on **conversation flow**: the person sets the pace, every turn gives 
 - `cargo test -p haven-core`: 28 tests pass including shared fixtures.
 - `npm run build`: zero TypeScript errors; production bundle built cleanly.
 
+### Stage 7: Natural Chat Cadence, Emotional Attunement & Journey Continuity (`feat(ux)`)
+**Added**
+- `platforms/web/src/storage/journeyStorage.ts`: Lightweight, private on-device persistence for the person's committed Little Step (`plan`, `confidence`, `timestamp`, `reviewed`) using browser `localStorage` with in-memory fallback for headless/test environments. Zero network egress.
+- `platforms/web/src/storage/journeyStorage.test.ts`: Vitest suite validating save, retrieve, review marking, and storage clearing.
+- **Option A Natural Messaging Delivery**:
+  - Coach reflections and inquiries split into separate, natural conversational speech bubbles.
+  - 600ms pause with animated typing dots (`.typing-indicator`, `.typing-dots`) between reflection and inquiry bubbles.
+  - Eliminated rigid boxed card badge containers ("I Hear You") and forced quote badges.
+- **Option B Sequential Check-in & Contextual Greeting**:
+  - First-time users are greeted with: *"Welcome. How are you feeling today, and what's on your mind?"*.
+  - Returning users with an unreviewed committed step arrive with: *"How are you feeling today?"*.
+  - Upon sharing their feelings, Haven reflects their emotional state first, then gently follows up on yesterday's step (*"By the way, were you able to try the little step you set for yourself last time...?"*).
+- **Emotion-Attuned Reflections**:
+  - Added dedicated attunement parsing covering exhaustion, anxiety, sadness, frustration, self-blame, work pressure, and desire for peace. Banned generic filler like "I hear you and that makes sense".
+  - Shifted terminology and questions from "what's on your heart" to "what's on your mind".
+- **Privacy & Sanitization**:
+  - `handlePanicWipe` and `handleResetSession` immediately clear on-device journey storage.
+
+**Verification**
+- `npm test`: 156 tests pass across 7 test files.
+- `npm run build`: zero TypeScript errors; production bundle built cleanly in 9.6s.
+
+

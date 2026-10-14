@@ -116,4 +116,47 @@ describe('generateSimulatedTurn', () => {
     );
     expect(explore.reflection).toContain('Work deadlines');
   });
+
+  it('generates emotionally attuned reflections for various emotional states', () => {
+    const exhaustion = generateSimulatedTurn(
+      makeDecision('Contract', 'ask'),
+      'I am feeling completely exhausted and overwhelmed by everything.'
+    );
+    expect(exhaustion.reflection).toContain('energy this has been taking out of you');
+
+    const anxiety = generateSimulatedTurn(
+      makeDecision('Contract', 'ask'),
+      'I have so much anxiety and worry racing in my head.'
+    );
+    expect(anxiety.reflection).toContain('mind has been spinning');
+
+    const sadness = generateSimulatedTurn(
+      makeDecision('Contract', 'ask'),
+      'I just feel so sad and lonely right now.'
+    );
+    expect(sadness.reflection).toContain('sadness is resting with you');
+
+    const frustration = generateSimulatedTurn(
+      makeDecision('Contract', 'ask'),
+      'I am so angry and frustrated about the argument.'
+    );
+    expect(frustration.reflection).toContain('frustrated and upset');
+
+    const peaceDesire = generateSimulatedTurn(
+      makeDecision('Contract', 'ask'),
+      'I just want some peace and quiet breathing room.'
+    );
+    expect(peaceDesire.reflection).toContain('craving some quiet breathing room');
+  });
+
+  it('incorporates previousStepReview gently into Contract or CheckIn phase inquiry', () => {
+    const turn = generateSimulatedTurn(
+      makeDecision('Contract', 'ask'),
+      'I am feeling a little better today.',
+      'Drink a glass of water when waking up'
+    );
+    expect(turn.inquiry).toContain(
+      'By the way, were you able to try the little step you set for yourself last time: "Drink a glass of water'
+    );
+  });
 });

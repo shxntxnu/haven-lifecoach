@@ -84,7 +84,26 @@ describe('runTurn: simulation turn pipeline', () => {
       expect(result.nextState.contract).toBe(
         'I want to feel less overwhelmed by work and more calm.'
       );
-      expect(result.inquiry).toContain('How does your body and your heart feel');
+      expect(result.inquiry).toContain('How does your body and your mind feel');
+    }
+  });
+
+  it('incorporates previousStepReview when returning user arrives with a prior committed step', async () => {
+    const state = createInitialFlowState();
+    const result = await runTurn({
+      userMessage: 'I am feeling quite drained and tired today.',
+      flowState: state,
+      history: [],
+      previousStepReview: 'Take a 5-minute walk outside without phone',
+    });
+
+    expect(result.kind).toBe('reply');
+    if (result.kind === 'reply') {
+      expect(result.inquiry).toContain(
+        'By the way, were you able to try the little step you set for yourself last time'
+      );
+      expect(result.inquiry).toContain('Take a 5-minute walk outside');
+      expect(result.reflection).toContain('drained');
     }
   });
 });

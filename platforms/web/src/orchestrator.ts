@@ -48,6 +48,7 @@ export interface OrchestratorTurnInput {
   modelId?: string;
   backend?: BackendGenerator;
   onTokenChunk?: (chunk: string) => void;
+  previousStepReview?: string;
 }
 
 export interface CrisisResult {
@@ -208,8 +209,16 @@ export function parseModelOutput(
 export async function runTurn(
   input: OrchestratorTurnInput
 ): Promise<OrchestratorResult> {
-  const { userMessage, flowState, history, intent, modelId, backend, onTokenChunk } =
-    input;
+  const {
+    userMessage,
+    flowState,
+    history,
+    intent,
+    modelId,
+    backend,
+    onTokenChunk,
+    previousStepReview,
+  } = input;
 
   // 1. Dual-Tier Pre-Inference Scan
   const preScanResult = preScan(userMessage);
@@ -246,7 +255,7 @@ export async function runTurn(
 
   if (isSimulation) {
     attempts = 1;
-    const sim = generateSimulatedTurn(decision, userMessage);
+    const sim = generateSimulatedTurn(decision, userMessage, previousStepReview);
     const violation = auditTurn(decision.replyPhase, decision.adviceRequested, sim);
     if (!violation) {
       verifiedPayload = sim;

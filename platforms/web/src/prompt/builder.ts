@@ -51,7 +51,7 @@ const PERSONA = [
 /** The opening intent of each phase, used when a phase has just started. */
 const PHASE_INTENT: Record<SessionPhase, string> = {
   Contract: 'Gently help them say what would make this time feel worth it.',
-  CheckIn: 'Ask how they are feeling in their body and their heart right now.',
+  CheckIn: 'Ask how they are feeling in their body and their mind right now.',
   Focus: 'Help them choose the one thing that matters most right now. Never choose the topic for them.',
   Explore: 'Help them look closely at what is happening and what matters to them. Do not try to fix anything.',
   Options: 'Help them notice what might be possible. Let them be the one to pick.',
@@ -73,7 +73,7 @@ const TURN_TASK: Record<ReplyKind, (phase: SessionPhase) => string> = {
   'honor-hold': () =>
     'They asked to slow down. Thank them, say there is no rush at all, and ask what would help them feel ready.',
   'invite-share': () =>
-    'They said they are ready, but they have not shared anything yet. Warmly invite them to share what is on their heart first.',
+    'They said they are ready, but they have not shared anything yet. Warmly invite them to share what is on their mind first.',
   'decline-advice': () =>
     'They asked what to do. Kindly say you will not tell them what to do because they know themselves best, say ideas can come a little later if they want, and ask ONE question about what matters to them.',
   'offer-options': () =>
@@ -124,7 +124,9 @@ export function buildSystemPrompt(ctx: PromptContext): string {
   lines.push('', `YOUR TASK THIS TURN: ${TURN_TASK[ctx.replyKind](ctx.phase)}`, '');
 
   lines.push('STRICT RULES:');
-  lines.push('1. Start with a warm, non-judgmental REFLECTION of what they felt or said.');
+  lines.push(
+    '1. Start with a warm, non-judgmental, SPECIFIC REFLECTION of what they felt or said. Never use generic filler like "I hear you and that makes sense". Attune directly to the specific emotional weight or situation they described.'
+  );
   lines.push("2. Ask at most ONE open question (prefer 'what' or 'how'; avoid 'why').");
   if (ctx.phase === 'Options' && ctx.adviceUnlocked) {
     lines.push('3. ADVICE IS ALLOWED THIS TURN because they invited ideas. Offer 2 or 3 brief options and ask which feels right.');
