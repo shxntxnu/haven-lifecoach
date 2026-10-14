@@ -104,3 +104,18 @@ v2 focuses on **conversation flow**: the person sets the pace, every turn gives 
 - `cargo test -p haven-core`: all Rust unit and integration tests pass, including shared fixtures.
 - `npm run build`: zero TypeScript errors; clean production build.
 
+### Stage 5: Person-led pacing and clear next steps (`feat(ux)`)
+**Added**
+- On-screen pacing controls (`.pacing-bar`, `.pacing-btn`) rendered directly above the message dock during Contract, CheckIn, Focus, Explore, and Options phases.
+  - "🌿 Not ready yet" (`intent: 'hold'`): informs Haven to stay in the current phase and explore at the person's pace.
+  - "✨ I'm ready to move on" (`intent: 'ready'`): allows the person to transition to the next coaching phase as soon as they feel ready, without arbitrary message turn counts.
+- `handlePacingChoice` in `App.tsx`: sends intent explicitly into the unified orchestrator pipeline, honoring human agency while preserving psychological safety.
+
+**Changed**
+- `index.css`: added styles and animations for the person-led pacing bar and responsive mobile layouts.
+- Guaranteed clear direction rule: every response either asks one gentle inquiry or provides an explicit instruction pointing to on-screen interactive controls.
+
+**Verification**
+- `npm test`: 148 tests pass across 6 test files.
+- `npm run build`: zero TypeScript errors; clean production build.
+

@@ -17,7 +17,7 @@ import { webllm, WebLLMProgress } from './webllm';
 import { createInitialFlowState, confirmCommitment, type FlowState } from './flow/controller';
 import { runTurn, createSafeFallback } from './orchestrator';
 import type { DialogueTurn } from './prompt/builder';
-import { Send, RotateCcw } from 'lucide-react';
+import { Send, RotateCcw, Clock, ArrowRight } from 'lucide-react';
 
 export const App: React.FC = () => {
   // Navigation & Stealth State
@@ -198,6 +198,117 @@ export const App: React.FC = () => {
     }
   };
 
+  // Handle Person-led Pacing Overrides
+  const handlePacingChoice = async (intent: 'ready' | 'hold') => {
+    const userText =
+      intent === 'ready'
+        ? "I'm ready to move on"
+        : "I'm not ready yet, let's take our time";
+
+    const userMsgId = `usr-${Date.now()}`;
+    const newMsg: ChatMessage = {
+      id: userMsgId,
+      sender: 'user',
+      text: userText,
+      timestamp: Date.now(),
+    };
+
+    setMessages((prev) => [...prev, newMsg]);
+
+    const isWebGPUActive =
+      selectedModelId !== 'simulated-airgap' && webllm.isReady(selectedModelId);
+    const coachTurnId = `coach-${Date.now()}`;
+
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: coachTurnId,
+        sender: 'coach',
+        reflection: 'Listening quietly to your words in your safe space...',
+        inquiry: '',
+        technique: isWebGPUActive ? 'Gentle Thinking (128k)' : 'Gentle Listening',
+        timestamp: Date.now(),
+      },
+    ]);
+
+    const history: DialogueTurn[] = messages
+      .filter((m) => m.id !== 'init-1' || m.sender === 'coach')
+      .map((m) => ({
+        speaker: m.sender === 'user' ? 'person' : 'haven',
+        text:
+          m.text ??
+          (m.reflection && m.inquiry
+            ? `${m.reflection} ${m.inquiry}`
+            : m.reflection || m.inquiry || ''),
+      }));
+
+    try {
+      const result = await runTurn({
+        userMessage: userText,
+        flowState,
+        history,
+        intent,
+        backend: isWebGPUActive
+          ? (msgs, onChunk) => webllm.generateChat(msgs, onChunk)
+          : undefined,
+        modelId: selectedModelId,
+      });
+
+      if (result.kind === 'crisis') {
+        setMessages((prev) => prev.filter((m) => m.id !== coachTurnId));
+        setCrisisAlert({
+          active: true,
+          category: result.matchedPatterns.join(', '),
+        });
+        return;
+      }
+
+      setFlowState(result.nextState);
+      setCurrentPhase(result.nextState.phase);
+      setOperatingMode(result.nextState.mode);
+
+      if (result.nextState.actionSeed && !actionPlan) {
+        setActionPlan(result.nextState.actionSeed);
+      }
+
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === coachTurnId
+            ? {
+                ...m,
+                reflection: result.reflection,
+                inquiry: result.inquiry,
+                technique: result.technique,
+              }
+            : m
+        )
+      );
+    } catch {
+      const fallback = createSafeFallback({
+        state: flowState,
+        action: 'stay',
+        replyPhase: currentPhase,
+        replyKind: intent === 'hold' ? 'honor-hold' : 'deepen',
+        reason: 'error_fallback',
+        adviceRequested: false,
+        adviceUnlocked: false,
+      });
+
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === coachTurnId
+            ? {
+                ...m,
+                reflection: fallback.reflection,
+                inquiry: fallback.inquiry,
+                technique: 'Gentle Safe Fallback',
+              }
+            : m
+        )
+      );
+    }
+  };
+
   // Advance from Commit to Close once action confidence is verified
   const handleConfirmCommitment = () => {
     const decision = confirmCommitment(flowState, actionPlan, actionConfidence);
@@ -357,32 +468,56 @@ export const App: React.FC = () => {
           )}
 
           {currentPhase !== 'Close' && (
-            <div className="input-dock" style={{ marginTop: currentPhase === 'Commit' ? '0.85rem' : 0 }}>
-              <input
-                type="text"
-                className="chat-input"
-                placeholder={
-                  currentPhase === 'Contract'
-                    ? "Tell me what's on your heart, take all the time you need..."
-                    : currentPhase === 'Commit'
-                    ? "Type your little step or reply to Haven here..."
-                    : "Whatever you want to say is okay here..."
-                }
-                value={inputText}
-                onChange={(e) => setInputText(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') handleSendMessage();
-                }}
-              />
-              <button
-                className="send-btn"
-                onClick={handleSendMessage}
-                disabled={!inputText.trim()}
-                aria-label="Send Message"
-              >
-                <span>Send</span>
-                <Send size={15} />
-              </button>
+            <div style={{ marginTop: currentPhase === 'Commit' ? '0.85rem' : '0.5rem' }}>
+              {currentPhase !== 'Commit' && (
+                <div className="pacing-bar">
+                  <button
+                    className="pacing-btn hold"
+                    onClick={() => handlePacingChoice('hold')}
+                    type="button"
+                    title="Tell Haven you'd like to stay in this part a bit longer"
+                  >
+                    <Clock size={12} />
+                    <span>Not ready yet</span>
+                  </button>
+                  <button
+                    className="pacing-btn"
+                    onClick={() => handlePacingChoice('ready')}
+                    type="button"
+                    title="Tell Haven you feel ready to move forward"
+                  >
+                    <ArrowRight size={12} />
+                    <span>I'm ready to move on</span>
+                  </button>
+                </div>
+              )}
+              <div className="input-dock">
+                <input
+                  type="text"
+                  className="chat-input"
+                  placeholder={
+                    currentPhase === 'Contract'
+                      ? "Tell me what's on your heart, take all the time you need..."
+                      : currentPhase === 'Commit'
+                      ? "Type your little step or reply to Haven here..."
+                      : "Whatever you want to say is okay here..."
+                  }
+                  value={inputText}
+                  onChange={(e) => setInputText(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleSendMessage();
+                  }}
+                />
+                <button
+                  className="send-btn"
+                  onClick={handleSendMessage}
+                  disabled={!inputText.trim()}
+                  aria-label="Send Message"
+                >
+                  <span>Send</span>
+                  <Send size={15} />
+                </button>
+              </div>
             </div>
           )}
 
