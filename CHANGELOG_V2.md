@@ -31,3 +31,9 @@ v2 focuses on **conversation flow**: the person sets the pace, every turn gives 
 ### Added
 - `haven-v2` branch created from `develop`.
 - This changelog.
+
+### Stage 0: Foundation (`chore(v2)`)
+- Web package version set to `2.0.0-alpha.1` (it had drifted at `0.4.0` while the v1 changelog reached `0.6.0`).
+- Added **Vitest** (`npm test`, `npm run test:watch`) and its config in `vite.config.ts`. Tests live next to the code as `src/**/*.test.ts`.
+- `.tmp/` added to `.gitignore`.
+
