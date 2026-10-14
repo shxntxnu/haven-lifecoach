@@ -19,14 +19,15 @@ v1 proved the idea, but its conversation flow has structural problems:
 
 v2 focuses on **conversation flow**: the person sets the pace, every turn gives a clear next step, and every reply is audited.
 
-### Planned (see `haven_v2_implementation_plan.md`)
-- Stage 0: changelog, version bump, test tooling.
-- Stage 1: Safety Guardian parity in the web app, with fixtures shared with Rust.
-- Stage 2: readiness-based phase controller.
-- Stage 3: prompt builder with rolling conversation history.
-- Stage 4: unified turn pipeline with audit, retry and safe fallback.
-- Stage 5: person-led pacing, clear next steps, more varied dialogue.
-- Stage 6: v2 documentation and human verification guide.
+### Stages Completed
+- [x] **Stage 0**: changelog, version bump, test tooling.
+- [x] **Stage 1**: Safety Guardian parity in the web app, with fixtures shared with Rust.
+- [x] **Stage 2**: readiness-based phase controller.
+- [x] **Stage 3**: prompt builder with rolling conversation history.
+- [x] **Stage 4**: unified turn pipeline with audit, retry and safe fallback.
+- [x] **Stage 5**: person-led pacing, clear next steps, more varied dialogue.
+- [x] **Stage 6**: v2 documentation and human verification guide.
+- [x] **Stage 7**: natural chat cadence (Option A separate bubbles + typing indicator), emotional attunement, mind-centered inquiries, and on-device journey continuity (Option B sequential check-in).
 
 ### Added
 - `haven-v2` branch created from `develop`.
@@ -144,6 +145,8 @@ v2 focuses on **conversation flow**: the person sets the pace, every turn gives 
 **Added**
 - `platforms/web/src/storage/journeyStorage.ts`: Lightweight, private on-device persistence for the person's committed Little Step (`plan`, `confidence`, `timestamp`, `reviewed`) using browser `localStorage` with in-memory fallback for headless/test environments. Zero network egress.
 - `platforms/web/src/storage/journeyStorage.test.ts`: Vitest suite validating save, retrieve, review marking, and storage clearing.
+- `platforms/web/src/orchestrator.ts`: Added `previousStepReview?: string` to `OrchestratorTurnInput`, passing it directly through to `generateSimulatedTurn` so the pipeline seamlessly contextualizes yesterday's step.
+- `platforms/web/src/orchestrator.test.ts`: Added integration tests verifying that `previousStepReview` correctly appears in the returning user's inquiry during the Contract phase.
 - **Option A Natural Messaging Delivery**:
   - Coach reflections and inquiries split into separate, natural conversational speech bubbles.
   - 600ms pause with animated typing dots (`.typing-indicator`, `.typing-dots`) between reflection and inquiry bubbles.
