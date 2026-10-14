@@ -96,6 +96,35 @@ class WebLLMService {
     return this.engine !== null && this.currentModelId === mlcModel;
   }
 
+  public async generateChat(
+    messages: { role: 'system' | 'user' | 'assistant'; content: string }[],
+    onTokenChunk?: (token: string) => void
+  ): Promise<string> {
+    if (!this.engine) {
+      throw new Error('WebLLM Engine not initialized');
+    }
+
+    const response = await this.engine.chat.completions.create({
+      messages,
+      temperature: 0.6,
+      max_tokens: 300,
+      stream: true,
+    });
+
+    let fullText = '';
+    for await (const chunk of response) {
+      const delta = chunk.choices[0]?.delta?.content || '';
+      if (delta) {
+        fullText += delta;
+        if (onTokenChunk) {
+          onTokenChunk(delta);
+        }
+      }
+    }
+
+    return fullText;
+  }
+
   public async generateCoachingTurn(
     systemPrompt: string,
     userMessage: string,

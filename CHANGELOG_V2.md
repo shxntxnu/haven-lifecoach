@@ -85,3 +85,22 @@ v2 focuses on **conversation flow**: the person sets the pace, every turn gives 
 - `npm test`: 133 tests pass across 4 test files.
 - `npm run build`: zero TypeScript errors.
 
+### Stage 4: Unified turn pipeline with audit and retry (`feat(orchestrator)`)
+**Added**
+- `platforms/web/src/simulation/dialogue.ts`: context-aware simulated replies replacing static string lookups. Maps every `FlowDecision` (`ask`, `deepen`, `reask`, `rephrase`, `offer-pause`, `honor-hold`, `invite-share`, `decline-advice`, `offer-options`, `ground`, `guide-card`, `closing`, `closed`) and phase to an audited `TurnPayload` that meets all ICF and Guardian standards.
+- `platforms/web/src/simulation/dialogue.test.ts`: tests verifying 100% audit compliance across all reply kinds and phases.
+- `platforms/web/src/orchestrator.ts`: unified 5-tier pipeline (`preScan` -> `decideTurn` -> prompt assembly -> generation -> `auditTurn` with self-healing retry loop of up to 3 attempts -> safe fallback template).
+  - Handles both real local models and instant air-gapped simulation through the same pipeline.
+  - Implements `parseModelOutput` to handle both structured JSON payloads and heuristic text extraction.
+  - Implements deterministic `createSafeFallback` mirroring the Rust orchestrator fallback policy.
+- `platforms/web/src/orchestrator.test.ts`: 10 comprehensive tests covering crisis interception without model invocation, amber mode clamping to Steady, simulation progression, real-model phase advancement (resolves v1 problem 2), self-healing retry on audit violations, and deterministic safe fallback.
+
+**Changed**
+- `platforms/web/src/webllm.ts`: added `generateChat(messages, onTokenChunk)` to stream chat completion with full rolling history.
+- `platforms/web/src/App.tsx`: wired session state to pure `FlowState` and switched message handling and commitment confirmation to the unified `orchestrator` pipeline.
+
+**Verification**
+- `npm test`: 148 tests pass across 6 test files.
+- `cargo test -p haven-core`: all Rust unit and integration tests pass, including shared fixtures.
+- `npm run build`: zero TypeScript errors; clean production build.
+

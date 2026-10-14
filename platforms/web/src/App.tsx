@@ -12,8 +12,11 @@ import { VaultAuthModal } from './components/VaultAuthModal';
 import { DecoyVaultView } from './components/DecoyVaultView';
 import { WelcomePage } from './components/WelcomePage';
 import { ChatMessage, OperatingMode, SessionPhase } from './types';
-import { AVAILABLE_MODELS, generateCoachResponse, runPreScan } from './engine';
+import { AVAILABLE_MODELS } from './engine';
 import { webllm, WebLLMProgress } from './webllm';
+import { createInitialFlowState, confirmCommitment, type FlowState } from './flow/controller';
+import { runTurn, createSafeFallback } from './orchestrator';
+import type { DialogueTurn } from './prompt/builder';
 import { Send, RotateCcw } from 'lucide-react';
 
 export const App: React.FC = () => {
@@ -35,6 +38,7 @@ export const App: React.FC = () => {
   });
 
   // Coaching Engine State
+  const [flowState, setFlowState] = useState<FlowState>(createInitialFlowState());
   const [currentPhase, setCurrentPhase] = useState<SessionPhase>('Contract');
   const [operatingMode, setOperatingMode] = useState<OperatingMode>('Steady');
   const [inputText, setInputText] = useState<string>('');
@@ -70,39 +74,24 @@ export const App: React.FC = () => {
     setMessages([]);
     setInputText('');
     setActionPlan('');
+    setFlowState(createInitialFlowState());
     // 2. Mark state as crypto-wiped
     setPanicWiped(true);
     // 3. Immediately switch into disguise mode
     setDisguiseMode(true);
   };
 
-  // Handle User Input Submission
+  // Handle User Input Submission via Unified Orchestrator Pipeline
   const handleSendMessage = async () => {
     if (!inputText.trim()) return;
 
     const userText = inputText.trim();
     setInputText('');
 
-    // Dual-Tier Safety Guardian: Layer 1 Pre-Scan
-    const preScan = runPreScan(userText);
-    if (preScan.tier === 'Red') {
-      setCrisisAlert({
-        active: true,
-        category: preScan.matchedCategory,
-      });
-      return;
-    }
-
-    let effectiveMode = operatingMode;
-    if (preScan.tier === 'Amber') {
-      // Amber clamp to Steady mode for psychological safety
-      effectiveMode = 'Steady';
-      setOperatingMode('Steady');
-    }
-
     // Append user message
+    const userMsgId = `usr-${Date.now()}`;
     const newMsg: ChatMessage = {
-      id: `usr-${Date.now()}`,
+      id: userMsgId,
       sender: 'user',
       text: userText,
       timestamp: Date.now(),
@@ -113,103 +102,109 @@ export const App: React.FC = () => {
     // If currently in Commit phase, typing in chat updates the action step directly
     if (currentPhase === 'Commit') {
       setActionPlan(userText);
-      setTimeout(() => {
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: `coach-${Date.now()}`,
-            sender: 'coach',
-            reflection: `"${userText}" sounds so peaceful and doable.`,
-            inquiry:
-              'I have placed that into your little step card below. When you feel ready, make sure the slider feels like an easy 8, 9, or 10, then tap the green button to finish our chat.',
-            technique: 'Taking a Small Step',
-            timestamp: Date.now(),
-          },
-        ]);
-      }, 300);
-      return;
     }
 
-    // Check if WebGPU engine is initialized for active model
-    const isWebGPUActive = selectedModelId !== 'simulated-airgap' && webllm.isReady(selectedModelId);
+    const isWebGPUActive =
+      selectedModelId !== 'simulated-airgap' && webllm.isReady(selectedModelId);
+    const coachTurnId = `coach-${Date.now()}`;
 
-    if (isWebGPUActive) {
-      const coachTurnId = `coach-${Date.now()}`;
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: coachTurnId,
-          sender: 'coach',
-          reflection: 'Listening quietly to your words in your safe space...',
-          inquiry: '',
-          technique: 'Gentle Thinking (128k)',
-          timestamp: Date.now(),
-        },
-      ]);
+    // Append placeholder for coach thinking
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: coachTurnId,
+        sender: 'coach',
+        reflection: 'Listening quietly to your words in your safe space...',
+        inquiry: '',
+        technique: isWebGPUActive ? 'Gentle Thinking (128k)' : 'Gentle Listening',
+        timestamp: Date.now(),
+      },
+    ]);
 
-      const systemPrompt = `You are Haven, a kind, gentle companion who speaks like a loving friend to the user's inner child. Phase: ${currentPhase}, Mode: ${effectiveMode}. Use very simple, warm, everyday words that a child could easily understand. Never use corporate jargon, big fancy words, or therapy speak. Start by softly reflecting back what they felt, then ask ONE simple, gentle question to help them breathe and look inside. Never tell them what to do.`;
+    const history: DialogueTurn[] = messages
+      .filter((m) => m.id !== 'init-1' || m.sender === 'coach')
+      .map((m) => ({
+        speaker: m.sender === 'user' ? 'person' : 'haven',
+        text:
+          m.text ??
+          (m.reflection && m.inquiry
+            ? `${m.reflection} ${m.inquiry}`
+            : m.reflection || m.inquiry || ''),
+      }));
 
-      try {
-        const turn = await webllm.generateCoachingTurn(systemPrompt, userText);
-        setMessages((prev) =>
-          prev.map((m) =>
-            m.id === coachTurnId
-              ? {
-                  ...m,
-                  reflection: turn.reflection,
-                  inquiry: turn.inquiry,
-                }
-              : m
-          )
-        );
-      } catch (err: any) {
-        // Fallback to deterministic simulation if WebGPU fails
-        const fallback = generateCoachResponse(currentPhase, userText, effectiveMode);
-        setMessages((prev) =>
-          prev.map((m) =>
-            m.id === coachTurnId
-              ? {
-                  ...m,
-                  reflection: fallback.reflection,
-                  inquiry: fallback.inquiry,
-                  technique: `${fallback.technique} (Gentle Safe Fallback)`,
-                }
-              : m
-          )
-        );
+    try {
+      const result = await runTurn({
+        userMessage: userText,
+        flowState,
+        history,
+        backend: isWebGPUActive
+          ? (msgs, onChunk) => webllm.generateChat(msgs, onChunk)
+          : undefined,
+        modelId: selectedModelId,
+      });
+
+      if (result.kind === 'crisis') {
+        setMessages((prev) => prev.filter((m) => m.id !== coachTurnId));
+        setCrisisAlert({
+          active: true,
+          category: result.matchedPatterns.join(', '),
+        });
+        return;
       }
-    } else {
-      // Deterministic Simulation engine (Zero download / instant execution)
-      setTimeout(() => {
-        const coachResp = generateCoachResponse(currentPhase, userText, effectiveMode);
 
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: `coach-${Date.now()}`,
-            sender: 'coach',
-            reflection: coachResp.reflection,
-            inquiry: coachResp.inquiry,
-            technique: coachResp.technique,
-            timestamp: Date.now(),
-          },
-        ]);
+      setFlowState(result.nextState);
+      setCurrentPhase(result.nextState.phase);
+      setOperatingMode(result.nextState.mode);
 
-        if (coachResp.suggestedNextPhase) {
-          setCurrentPhase(coachResp.suggestedNextPhase);
-          if (coachResp.suggestedNextPhase === 'Commit' && !actionPlan) {
-            setActionPlan(userText);
-          }
-        }
-        if (coachResp.suggestedMode) {
-          setOperatingMode(coachResp.suggestedMode);
-        }
-      }, 400);
+      if (result.nextState.actionSeed && !actionPlan) {
+        setActionPlan(result.nextState.actionSeed);
+      }
+
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === coachTurnId
+            ? {
+                ...m,
+                reflection: result.reflection,
+                inquiry: result.inquiry,
+                technique: result.technique,
+              }
+            : m
+        )
+      );
+    } catch {
+      const fallback = createSafeFallback({
+        state: flowState,
+        action: 'stay',
+        replyPhase: currentPhase,
+        replyKind: 'deepen',
+        reason: 'error_fallback',
+        adviceRequested: false,
+        adviceUnlocked: false,
+      });
+
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === coachTurnId
+            ? {
+                ...m,
+                reflection: fallback.reflection,
+                inquiry: fallback.inquiry,
+                technique: 'Gentle Safe Fallback',
+              }
+            : m
+        )
+      );
     }
   };
 
   // Advance from Commit to Close once action confidence is verified
   const handleConfirmCommitment = () => {
+    const decision = confirmCommitment(flowState, actionPlan, actionConfidence);
+    setFlowState(decision.state);
+    setCurrentPhase(decision.state.phase);
+    setOperatingMode(decision.state.mode);
+
     setMessages((prev) => [
       ...prev,
       {
@@ -228,7 +223,6 @@ export const App: React.FC = () => {
       },
     ]);
 
-    setCurrentPhase('Close');
     setShowCheckout(true);
   };
 
@@ -250,6 +244,7 @@ export const App: React.FC = () => {
 
   // Reset Session
   const handleResetSession = () => {
+    setFlowState(createInitialFlowState());
     setCurrentPhase('Contract');
     setOperatingMode('Steady');
     setActionConfidence(9);
