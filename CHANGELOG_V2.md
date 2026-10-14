@@ -58,3 +58,20 @@ v2 focuses on **conversation flow**: the person sets the pace, every turn gives 
 - `cargo test --workspace`: all pass, including the red-team (2,240 prompts) and vertical-slice suites.
 - `npm test`: 53 tests pass. `npm run build`: no TypeScript errors.
 
+### Stage 2: Readiness-based flow controller (`feat(flow)`)
+**Added** (`platforms/web/src/flow/`, pure logic, not wired into the UI until Stage 4)
+- `phases.ts`: the phase table. One place defines how much a person must share before each phase can move on (`minTurns`, `minWords`) and which mode applies.
+- `signals.ts`: small readers of a single message: word count, "I don't know"-style non-answers, explicit pacing intent ("I'm ready" / "not yet"), and advice requests.
+- `controller.ts`: `decideTurn()` and `confirmCommitment()`. Given the current state and a message, they return the next state plus *what the reply should do* (`replyKind`), without mutating anything.
+
+**Behaviour (fixes v1 problems 1 and 2 at the logic level)**
+- A phase advances **only on a turn where the person shared something real**, or said they are ready. A bare "ok" can never push the conversation forward.
+- Explore needs two substantive turns. The person can say "I'm ready" (or use a UI control) to move on sooner, and "not yet" always wins, even when the criteria are met.
+- **Gentle re-ask ladder** for very short replies: re-ask, then offer a simpler way in, then offer a pause.
+- **Advice gate:** asking for advice is declined outside Options and never counts as sharing; in Options an invitation unlocks 2-3 ideas.
+- **Distress:** an amber signal clamps mode to Steady and holds back Options/Commit until the person has had two calm turns in a row.
+- Commit is confirmed by `confirmCommitment()`: a step is required and confidence must be at least 8 (rule moved out of the UI, mirrors Rust).
+
+**Verification**
+- 62 new tests (115 in total). Includes purity (frozen state) and determinism checks.
+
