@@ -84,7 +84,47 @@ describe('runTurn: simulation turn pipeline', () => {
       expect(result.nextState.contract).toBe(
         'I want to feel less overwhelmed by work and more calm.'
       );
-      expect(result.inquiry).toContain('How does your body and your mind feel');
+      expect(result.inquiry).toContain(
+        'what would feel most gentle and supportive for you to focus on'
+      );
+    }
+  });
+
+  it('advances from Contract to CheckIn with positive energy when user shares a celebratory or happy goal', async () => {
+    const state = createInitialFlowState();
+    const result = await runTurn({
+      userMessage: 'I am feeling really excited and happy because I launched my project today!',
+      flowState: state,
+      history: [],
+    });
+
+    expect(result.kind).toBe('reply');
+    if (result.kind === 'reply') {
+      expect(result.decision.action).toBe('advance');
+      expect(result.nextState.phase).toBe('CheckIn');
+      expect(result.technique).toBe('Celebrating Your Energy');
+      expect(result.inquiry).toContain('what feels like the best place for us to focus our conversation');
+      expect(result.reflection).not.toContain('heavy');
+      expect(result.reflection).not.toContain('tired');
+    }
+  });
+
+  it('advances from Contract to CheckIn with reflective grounding when user shares a practical habit or plan', async () => {
+    const state = createInitialFlowState();
+    const result = await runTurn({
+      userMessage: 'I feel okay today, just trying to organize my morning routine.',
+      flowState: state,
+      history: [],
+    });
+
+    expect(result.kind).toBe('reply');
+    if (result.kind === 'reply') {
+      expect(result.decision.action).toBe('advance');
+      expect(result.nextState.phase).toBe('CheckIn');
+      expect(result.technique).toBe('Checking In On You');
+      expect(result.inquiry).toContain('what would make this conversation feel most meaningful and helpful for you');
+      expect(result.reflection).not.toContain('heavy');
+      expect(result.reflection).not.toContain('pain');
     }
   });
 

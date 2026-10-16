@@ -10,7 +10,7 @@ interface PhaseTimelineProps {
 const PHASES: { id: SessionPhase; label: string; index: number }[] = [
   { id: 'Contract', label: '1. Arrive', index: 1 },
   { id: 'CheckIn', label: '2. Check-In', index: 2 },
-  { id: 'Focus', label: '3. The Heart', index: 3 },
+  { id: 'Focus', label: '3. Finding Focus', index: 3 },
   { id: 'Explore', label: '4. Looking In', index: 4 },
   { id: 'Options', label: '5. New Paths', index: 5 },
   { id: 'Commit', label: '6. Little Step', index: 6 },

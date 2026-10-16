@@ -2,7 +2,11 @@ import { describe, expect, it } from 'vitest';
 import { createInitialFlowState, type FlowDecision, type ReplyKind } from '../flow/controller';
 import { auditTurn } from '../safety/guardian';
 import type { SessionPhase } from '../types';
-import { generateSimulatedTurn } from './dialogue';
+import {
+  classifyTone,
+  extractTopicPhrase,
+  generateSimulatedTurn,
+} from './dialogue';
 
 const ALL_PHASES: SessionPhase[] = [
   'Contract',
@@ -158,5 +162,35 @@ describe('generateSimulatedTurn', () => {
     expect(turn.inquiry).toContain(
       'By the way, were you able to try the little step you set for yourself last time: "Drink a glass of water'
     );
+  });
+
+  it('correctly classifies emotional valence and tone', () => {
+    expect(classifyTone('I am feeling so excited and happy about my new job!')).toBe('positive');
+    expect(classifyTone('I am feeling completely exhausted and overwhelmed.')).toBe('vulnerable');
+    expect(classifyTone('I feel okay today, just trying to organize my weekly routine.')).toBe('reflective');
+  });
+
+  it('extracts topic phrases cleanly without conversational clutter', () => {
+    expect(extractTopicPhrase('I want to feel less overwhelmed by work')).toBe('feel less overwhelmed by work');
+    expect(extractTopicPhrase("I'm feeling really good and want to write my book")).toBe('write my book');
+    expect(extractTopicPhrase('I just want some peace and quiet')).toBe('peace and quiet');
+  });
+
+  it('adapts CheckIn and Explore naturally to positive topics without assuming suffering', () => {
+    const positiveCheckIn = generateSimulatedTurn(
+      makeDecision('CheckIn', 'ask'),
+      'I feel amazing today and want to celebrate finishing my project!'
+    );
+    expect(positiveCheckIn.technique).toBe('Celebrating Your Energy');
+    expect(positiveCheckIn.inquiry).toContain('what feels like the best place for us to focus our conversation');
+    expect(positiveCheckIn.reflection).not.toContain('heavy');
+    expect(positiveCheckIn.reflection).not.toContain('tired');
+
+    const positiveExplore = generateSimulatedTurn(
+      makeDecision('Explore', 'ask'),
+      'Writing my book chapter feels so inspiring.'
+    );
+    expect(positiveExplore.technique).toBe('Looking Deeper');
+    expect(positiveExplore.inquiry).toContain('What makes this feel so meaningful to you');
   });
 });

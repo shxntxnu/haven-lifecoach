@@ -28,6 +28,7 @@ v2 focuses on **conversation flow**: the person sets the pace, every turn gives 
 - [x] **Stage 5**: person-led pacing, clear next steps, more varied dialogue.
 - [x] **Stage 6**: v2 documentation and human verification guide.
 - [x] **Stage 7**: natural chat cadence (Option A separate bubbles + typing indicator), emotional attunement, mind-centered inquiries, and on-device journey continuity (Option B sequential check-in).
+- [x] **Stage 8**: contextual tone awareness (`positive`, `reflective`, `vulnerable`), non-negative journey flow, and elimination of distress bias.
 
 ### Added
 - `haven-v2` branch created from `develop`.
@@ -164,5 +165,27 @@ v2 focuses on **conversation flow**: the person sets the pace, every turn gives 
 **Verification**
 - `npm test`: 156 tests pass across 7 test files.
 - `npm run build`: zero TypeScript errors; production bundle built cleanly in 9.6s.
+
+### Stage 8: Contextual Tone Awareness & Non-Negative Journey Flow (`feat(ux)`)
+**Added**
+- `classifyTone(userMessage)` in `platforms/web/src/simulation/dialogue.ts`: Classifies message emotional valence into `'positive'`, `'vulnerable'`, or `'reflective'` so Haven meets the person where they actually are without assuming suffering.
+- `extractTopicPhrase(text)` in `platforms/web/src/simulation/dialogue.ts`: Cleanly extracts core topic goals without conversational filler or clumsy truncated quote marks.
+- **Check-In (`2. Check-In`) Contextual Overhaul**:
+  - Removed robotic repeat of *"How does your body and your mind feel right now in this quiet moment?"* when the client just answered the arrival question.
+  - Matches the client's tone: celebrates positive momentum (`Celebrating Your Energy`), meets practical curiosity (`Checking In On You`), or holds gentle space for tenderness (`Holding Safe Space`).
+  - Seamlessly bridges to asking what they want to focus on (or reviews yesterday's step).
+- **Elimination of Pervasive Negativity Assumptions**:
+  - Removed assumption that work or projects are "relentless demands".
+  - Renamed Phase 4 technique from `'Exploring What Hurts'` to `'Looking Deeper'` / `'Exploring Together'`.
+  - Replaced assumptions that the client is "carrying a heavy burden" with neutral/positive exploration of strengths and goals unless struggle is explicitly stated.
+  - Renamed Phase 3 timeline label from `3. The Heart` to `3. Finding Focus` in `PhaseTimeline.tsx`.
+- **System Prompt Governance (`prompt/builder.ts`)**:
+  - Updated `PHASE_INTENT` for CheckIn and Explore to mandate tone-matched exploration.
+  - Updated `Rule 1` to strictly forbid assuming distress or suffering.
+
+**Verification**
+- `npm test`: 161 tests pass across 7 test files.
+- `npm run build`: zero TypeScript errors; production bundle built cleanly in 11.2s.
+
 
 

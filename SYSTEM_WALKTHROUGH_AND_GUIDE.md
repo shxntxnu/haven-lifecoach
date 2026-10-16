@@ -156,13 +156,13 @@ graph TD
 
 #### 1. 7-Phase Deterministic State Machine ([`state_machine.rs`](file:///d:/Documents/_MyStuff/Projects/haven-lifecoach/crates/haven-core/src/state_machine.rs))
 Small on-device language models (1B–8B parameters) hallucinate, jump to conclusions, or give premature advice if left unconstrained. Haven enforces coaching discipline via a deterministic Rust state machine, presented in warm, childhood-accessible language:
-* **Phase 1: Contract (`1. Arrive`)**: Opens a safe, unhurried space without corporate jargon (*"I'm so glad you're here. What feels heaviest or most on your mind today?"*).
-* **Phase 2: Check-In (`2. Check-In`)**: Checks how your heart and body feel inside (`Calm & Safe` mode). If distress is detected, mode automatically clamps to `Steady` to prioritize grounding.
-* **Phase 3: Focus (`3. The Heart`)**: The client points to what matters most right now (*"Of everything you're carrying, what does your heart want us to look at together?"*). Haven never imposes an agenda.
-* **Phase 4: Explore (`4. Looking In`)**: Deepens self-awareness using Motivational Interviewing (OARS). The **Advice Gate is locked**—Haven never prescribes solutions, helping you trust your own inner wisdom.
+* **Phase 1: Contract (`1. Arrive`)**: Opens a safe, unhurried space without corporate jargon (*"Welcome. How are you feeling today, and what's on your mind?"*).
+* **Phase 2: Check-In (`2. Check-In`)**: Contextually reflects the client's actual emotional state—whether celebratory, practical, or tender—and bridges into what feels most supportive or exciting to focus on today, without repeating the arrival question. (If returning with a prior step, gently follows up on yesterday's action step).
+* **Phase 3: Focus (`3. Finding Focus`)**: The client points to what matters most right now (*"If we could gently explore just one key aspect of this together today, what feels most important to you?"*). Haven never imposes an agenda and never assumes struggle unless stated.
+* **Phase 4: Explore (`4. Looking In`)**: Deepens self-awareness using Motivational Interviewing (OARS). Explores strengths and momentum for positive goals, or gentle understanding for challenging topics. The **Advice Gate is locked**—Haven never prescribes solutions, helping you trust your own inner wisdom.
 * **Phase 5: Options (`5. New Paths`)**: Shifts into gentle possibilities (`Hopeful & Creative`). If invited, Haven shares 2–3 gentle ideas and asks what feels light or right.
 * **Phase 6: Commit (`6. Little Step`)**: The client sizes a tiny baby step and rates confidence (0–10). If confidence is $<8/10$, the **Gentle Action Shrinkage Protocol** helps break it into an effortless micro-step where they feel safe and capable.
-* **Phase 7: Close (`7. Rest & Close`)**: Celebrates the courage to show up, captures a gentle 1–5 checkout score, and seals the session with envelope encryption.
+* **Phase 7: Close (`7. Rest & Close`)**: Celebrates the time spent together, captures a gentle 1–5 checkout score, and seals the session with envelope encryption.
 
 #### 2. Dual-Tier Safety Guardian ([`guardian.rs`](file:///d:/Documents/_MyStuff/Projects/haven-lifecoach/crates/haven-core/src/guardian.rs))
 Operates as a bidirectional firewall:

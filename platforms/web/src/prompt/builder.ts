@@ -51,9 +51,11 @@ const PERSONA = [
 /** The opening intent of each phase, used when a phase has just started. */
 const PHASE_INTENT: Record<SessionPhase, string> = {
   Contract: 'Gently help them say what would make this time feel worth it.',
-  CheckIn: 'Ask how they are feeling in their body and their mind right now.',
+  CheckIn:
+    'Acknowledge how they are feeling and their energy with genuine contextual awareness (matching their tone whether positive, reflective, or tender), and gently bridge to what they want to focus on today.',
   Focus: 'Help them choose the one thing that matters most right now. Never choose the topic for them.',
-  Explore: 'Help them look closely at what is happening and what matters to them. Do not try to fix anything.',
+  Explore:
+    'Help them look closely at what is happening and explore what matters to them with curiosity. Never assume they are struggling unless they explicitly said so, and do not try to fix anything.',
   Options: 'Help them notice what might be possible. Let them be the one to pick.',
   Commit: 'Point them to the little step box on the screen and help them make their step tiny and easy.',
   Close: 'Wrap up warmly and thank them for being here.',
@@ -125,7 +127,7 @@ export function buildSystemPrompt(ctx: PromptContext): string {
 
   lines.push('STRICT RULES:');
   lines.push(
-    '1. Start with a warm, non-judgmental, SPECIFIC REFLECTION of what they felt or said. Never use generic filler like "I hear you and that makes sense". Attune directly to the specific emotional weight or situation they described.'
+    '1. Start with a warm, non-judgmental, SPECIFIC REFLECTION of what they felt or said. Never use generic filler like "I hear you and that makes sense". Attune directly to their specific emotional tone (celebrating positive energy, meeting curiosity, or holding space for challenges) and the specific situation they described. Never assume they are hurting, struggling, or carrying a heavy burden unless they explicitly said so.'
   );
   lines.push("2. Ask at most ONE open question (prefer 'what' or 'how'; avoid 'why').");
   if (ctx.phase === 'Options' && ctx.adviceUnlocked) {
